@@ -97,16 +97,62 @@ Definido en `AGENTS.md` §11. Resumen:
 
 ---
 
-## Git
+## Git workflow
 
-- Branch default: `main`.
-- Branches de trabajo: `feature/<nombre>`, `fix/<descripcion>`, `chore/<tarea>`.
-- Commits: `feat(módulo): descripción en infinitivo`.
-- PRs con descripción + checklist de validación manual en dispositivo.
-- NO push directo a `main`.
+Inspirado en el patrón de `tienda` (el más maduro de los 3 repos de referencia).
+
+### Branches
+
+- `main` — **producción**. Cada push dispara EAS build (APK preview). Solo llega acá por PR desde `develop` con CI verde.
+- `develop` — **integración**. Todo trabajo termina acá primero. Push o PR a `develop` dispara CI (lint + typecheck + tests).
+- `feature/<nombre>` — feature nueva, parte de `develop`.
+- `fix/<descripcion>` — bug fix, parte de `develop`.
+- `chore/<tarea>` — tareas de infra / housekeeping, parte de `develop`.
+
+### Flujo estándar
+
+```
+feature/xxx ──PR──► develop ──PR──► main ──trigger──► EAS build ──► APK link en expo.dev
+```
+
+1. `git checkout develop && git pull`
+2. `git checkout -b feature/mi-cosa`
+3. Commits: `feat(módulo): descripción en infinitivo` (es-AR OK).
+4. Push a `origin feature/mi-cosa` → abrir PR a `develop` (template en `.github/pull_request_template.md`).
+5. CI corre lint + typecheck + tests. Si falla, no se mergea.
+6. Merge a `develop`. Periódicamente, PR `develop → main` cuando hay un hito listo.
+7. Merge a `main` dispara `release.yml` → EAS build preview → APK shareable.
+
+### Reglas duras
+
+- ❌ **No push directo a `main`** ni a `develop`. Todo vía PR.
+- ❌ No mergear PRs con CI rojo.
+- ❌ No `--force push` a `main` ni `develop` nunca.
+- ✅ Rebase local antes del push (`git pull --rebase origin develop`).
+- ✅ Commits atómicos (un concepto por commit).
+
+### CI (ver `.github/workflows/`)
+
+- `ci.yml` — corre en PRs a `main`/`develop` y en push a `develop`. Ejecuta `typecheck`, `lint`, `test:ci`.
+- `release.yml` — corre en push a `main` y manual (`workflow_dispatch`). Quality gate (tests) → `eas build --profile preview --platform android --no-wait`. Requiere secret `EXPO_TOKEN`.
+
+### Dónde ver el APK de una versión de `main`
+
+1. Dashboard EAS: https://expo.dev/accounts/saadypacheco/projects/gestion-ordenes/builds
+2. Cada build tiene URL compartible + QR para instalar en el celular.
+3. Los logs del job `build` en GitHub Actions también imprimen el URL.
+
+### Tests
+
+- `pnpm test` — corre Jest local.
+- `pnpm test:watch` — modo watch.
+- `pnpm test:ci` — modo CI (`--ci --passWithNoTests`).
+- Tests obligatorios en: `src/api/parsers.ts`, `src/db/repositories/*`, `src/features/sync/*`, cualquier cosa que toque el contrato legacy del backend.
 
 ---
 
 ## Repo
 
 https://github.com/saadypacheco/gestionordenes
+
+- EAS dashboard: https://expo.dev/accounts/saadypacheco/projects/gestion-ordenes

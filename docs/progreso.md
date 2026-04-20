@@ -11,6 +11,20 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] Paleta, plataformas objetivo, identificación de la app
 - [ ] Confirmar comando de scaffold y arrancar Fase 1
 
+## Fase 1.5 — CI/CD + testing + git workflow ✅
+
+- [x] Jest 29 + jest-expo 55 + testing-library/react-native + @types/jest
+- [x] `jest.config.js` con preset `jest-expo` y `moduleNameMapper` para `@/*`
+- [x] Smoke tests en `src/config/constants.test.ts` (13 tests verdes, regresión de contrato con backend legacy)
+- [x] Scripts `test`, `test:watch`, `test:ci` en `package.json`
+- [x] `.github/workflows/ci.yml` — lint + typecheck + tests en PRs a `main`/`develop` y push a `develop`
+- [x] `.github/workflows/release.yml` — quality gate + `eas build --profile preview --platform android` en push a `main`
+- [x] `.github/pull_request_template.md`
+- [x] Secret `EXPO_TOKEN` cargado en GitHub (por el usuario)
+- [x] `CLAUDE.md` actualizado con sección "Git workflow"
+- [x] `AGENTS.md` §13 documenta distribución y EAS dashboard
+- [x] Rama `develop` creada desde `main` y pusheada
+
 ## Fase 1 — Scaffold ✅
 
 - [x] `pnpm create expo-app` con template `default` (Expo SDK 54 + TS + Expo Router)

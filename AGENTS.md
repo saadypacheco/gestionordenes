@@ -548,7 +548,43 @@ Ver `docs/decisiones.md` para el racional completo.
 
 ---
 
-## 13. Qué NO hacer
+## 13. Distribución y dónde "ver" una versión
+
+La app **no tiene URL pública** como los proyectos web del stack SDD. Se ve de tres maneras:
+
+| Mecanismo | Qué es | Dónde se ve |
+|---|---|---|
+| **EAS Build** | Cada push a `main` genera un APK firmado (Android) vía GitHub Actions | [expo.dev dashboard](https://expo.dev/accounts/saadypacheco/projects/gestion-ordenes/builds) — URL + QR para instalar |
+| **EAS Update (OTA)** | Bundle JS publicado a un canal (`preview`/`production`) | App instalada en el celular lo descarga al siguiente arranque. Dashboard `/updates` |
+| **Play Console / TestFlight** | Distribución oficial cerrada | Cuando se active — pendiente en §14 |
+
+### Workflow de release (ver `.github/workflows/release.yml`)
+
+```
+push a main ──► quality gate (typecheck + tests)
+                    ▼
+              eas build preview (Android, --no-wait)
+                    ▼
+              APK disponible en expo.dev/...builds
+```
+
+- Trigger manual: `workflow_dispatch` permite elegir `preview` o `production`.
+- Token: GitHub secret `EXPO_TOKEN` (ya configurado).
+
+### Git workflow
+
+Detalle en `CLAUDE.md` → sección "Git workflow". Resumen:
+
+- `main` — producción, disparador de EAS builds.
+- `develop` — integración.
+- `feature/*`, `fix/*`, `chore/*` — parten de `develop`.
+- PR a `develop` corre `ci.yml` (lint + typecheck + tests).
+- PR `develop → main` cuando hay un hito.
+- **Nunca** push directo a `main` ni `develop`.
+
+---
+
+## 14. Qué NO hacer
 
 - ❌ Modificar el backend (URLs, payload, casing).
 - ❌ Migrar código Angular/Ionic al nuevo stack — sólo se migra el **comportamiento**.
