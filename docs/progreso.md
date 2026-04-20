@@ -11,26 +11,28 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] Paleta, plataformas objetivo, identificación de la app
 - [ ] Confirmar comando de scaffold y arrancar Fase 1
 
-## Fase 1 — Scaffold
+## Fase 1 — Scaffold ✅
 
 - [x] `pnpm create expo-app` con template `default` (Expo SDK 54 + TS + Expo Router)
 - [x] Estructura de carpetas según `AGENTS.md` §7 (app/ + src/ con subdirs)
 - [x] Rutas placeholder: login, (tabs)/{index,sync}, orden/[id]/{7 tabs}, +not-found
-- [x] `app.config.ts` con `EXPO_PUBLIC_API_URL`
+- [x] `app.config.ts` con `EXPO_PUBLIC_API_URL` dinámico
 - [x] `app.json` con `bundleIdentifier` + `package` = `com.gestionordenes.app`, minSdk 24, deploymentTarget 15.1
 - [x] `eas.json` con perfiles `development` / `preview` / `production`
 - [x] `tailwind.config.js` con la paleta del §4
 - [x] `drizzle.config.ts` apuntando a `./src/db/schema.ts`
 - [x] `metro.config.js` con `withNativeWind`
 - [x] `babel.config.js` con preset Expo + nativewind
-- [x] `tsconfig.json` con alias `@/*` → `./src/*`
+- [x] `tsconfig.json` con alias `@/*` → `./src/*`, excluye legacy
 - [x] `assets/network_security_config.xml` para cleartext acotado a alerthor.net
-- [x] `.env.example`, `.gitignore` (ampliado)
+- [x] `.env.example`, `.gitignore` ampliado
 - [x] `README.md` reemplazado por el nuestro
 - [x] `docs/backend-endpoints.md` con contrato exhaustivo del backend legacy
-- [ ] Dependencias adicionales instaladas (en curso)
-- [ ] `git init` + primer commit + remote a GitHub
-- [ ] `pnpm start` corriendo sin errores
+- [x] Dependencias instaladas: Zustand, TanStack Query, Drizzle ORM, NativeWind 4 (+ tailwind 3.4), Lucide, Inter font, react-hook-form + zod, expo-sqlite/camera/secure-store/location/crypto/image-manipulator/file-system/network/background-fetch/task-manager/updates/build-properties, AsyncStorage, NetInfo
+- [x] Dev deps: drizzle-kit, tailwindcss, @types/node
+- [x] `pnpm typecheck` pasa limpio
+- [x] `expo config` carga sin errores
+- [x] `git init` + primer commit + push a `origin/main` de https://github.com/saadypacheco/gestionordenes
 
 ## Fase 2 — HTTP + parser backend
 
