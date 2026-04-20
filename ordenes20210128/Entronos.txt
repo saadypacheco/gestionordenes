@@ -1,0 +1,5 @@
+Entronos
+
+worker:  69.164.213.180
+
+alerthor ssh -p 8597 root@173.230.146.7

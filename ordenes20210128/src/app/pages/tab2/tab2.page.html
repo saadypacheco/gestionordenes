@@ -1,0 +1,39 @@
+<ion-header [translucent]="true">
+    <ion-toolbar>
+        <ion-title>
+            SINCRONIZAR
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <ion-header collapse="condense">
+        <ion-toolbar>
+            <ion-title size="large">SINCRONIZAR</ion-title>
+        </ion-toolbar>
+    </ion-header>
+
+    <ion-list>
+        <ion-item *ngFor="let orden of ordenes">
+            <ion-label class="ion-text-wrap">
+                <ion-text>
+                    <b>{{orden.ordenId}} : {{orden.calle}} {{orden.numero}}</b>
+
+                    <p>
+                        {{orden.cliente}}
+                    </p>
+
+                </ion-text>
+            </ion-label>
+        </ion-item>
+
+    </ion-list>
+    <ion-row class="ion-padding-vertical">
+        <ion-col size="12" class="ion-text-right">
+            <ion-button expand="block" (click)="sincronizar()" color="danger">
+                sincronizar
+            </ion-button>
+        </ion-col>
+
+    </ion-row>
+</ion-content>

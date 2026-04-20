@@ -1,0 +1,19 @@
+ion-select {
+    /* Applies to the value and placeholder color */
+    color: #545ca7;
+    /* Set a different placeholder color */
+    --placeholder-color: #971e49;
+    /* Set full opacity on the placeholder */
+    --placeholder-opacity: 1;
+    size: 9px;
+    width: 100%;
+    justify-content: center;
+}
+
+ion-datetime {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
+    size: large!important;
+    padding-top: 19px !important;
+    padding-right: 19px !important;
+}

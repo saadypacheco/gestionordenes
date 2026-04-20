@@ -1,0 +1,25 @@
+<ion-content>
+    <ion-list>
+        <ion-item-sliding *ngFor="let tarea of orden.tareas; let i=index" class="animated fadeInDown">
+            <ion-item>
+                <div class="ion-text-uppercase">
+                    <ion-label>
+                        <ion-text>
+                            <strong>{{tarea.tareaId}}</strong>-{{tarea.Descripcion}} ({{tarea.cantidad}})
+                        </ion-text>
+                    </ion-label>
+                </div>
+            </ion-item>
+            <ion-item-options side="end" *ngIf="orden.estadoId== 15">
+                <ion-item-option (click)="deleteTarea(i)" color="danger">
+                    <ion-icon slot="icon-only" name="trash"></ion-icon>
+                </ion-item-option>
+            </ion-item-options>
+        </ion-item-sliding>
+    </ion-list>
+</ion-content>
+<ion-fab *ngIf="orden.estadoId== 15" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="addTarea()">
+        <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+</ion-fab>

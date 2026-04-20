@@ -1,0 +1,26 @@
+<ion-content>
+    <ion-grid fixed>
+        <ion-row>
+            <div class="spin" *ngIf="cargando == true">
+                <ion-spinner name="bubbles"></ion-spinner>
+            </div>
+            <ion-col size="12" size-lg="3" size md="4" size-md="6" size-xs="12" *ngFor="let image of fotos">
+                <ion-card>
+                    <img [src]="image">
+                </ion-card>
+            </ion-col>
+        </ion-row>
+        <ion-row class="ion-padding-vertical">
+            <ion-col class="ion-text-center" *ngIf="fotos.length > 0 && guardar">
+                <ion-button (click)="saveFotos()" shape="round">
+                    Guardar
+                </ion-button>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</ion-content>
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="gallery()">
+        <ion-icon name="camera"></ion-icon>
+    </ion-fab-button>
+</ion-fab>

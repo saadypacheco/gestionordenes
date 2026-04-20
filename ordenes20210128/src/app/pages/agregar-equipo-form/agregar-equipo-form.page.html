@@ -1,0 +1,96 @@
+<ion-header no-border>
+    <ion-toolbar>
+        <ion-title text-capitalize> REGISTRAR EQUIPO</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-list>
+    <ion-item>
+        <ion-label class="ion-text-wrap">
+            <ion-text>
+                <b>Orden: {{orden.ordenId}} </b>
+                <p><b>Direccion:{{orden.calle}} {{orden.numero}}</b></p>
+                <p>Cliente: {{orden.cliente}}</p>
+            </ion-text>
+        </ion-label>
+    </ion-item>
+
+</ion-list>
+
+
+<ion-content class="ion-padding-top">
+    <form (ngSubmit)="saveNewEquipo(fEquipo)" #fEquipo="ngForm">
+        <ion-list>
+            <ion-item>
+                <ion-label>Abonado</ion-label>
+                <ion-toggle name="abonado" [(ngModel)]="abonado"></ion-toggle>
+            </ion-item>
+            <ion-row>
+                <ion-col size="7">
+                    <ion-item class="padding" *ngIf="!abonado">
+                        <ion-label position="floating"> Equipo </ion-label>
+                        <ionic-selectable name="equipo" 
+                        item-content slot [(ngModel)]="equipoSelected" 
+                        [items]="equipos" 
+                        itemValueField="nroSerie" 
+                        itemTextField="nroSerie" 
+                        [canSearch]="true" 
+                        searchFailText="Lo sentimos no hay resultado " 
+                        closeButtonText="Cerrar"
+                        closeButtonSlot="end" 
+                        (onSearch)="buscarEquipo($event)">
+                            <ng-template ionicSelectableItemTemplate let-equipoSelected="item">
+                                <ion-text class="ion-text-lowercase">
+                                    {{equipoSelected.nroSerie}} - {{equipoSelected.descripcion}}
+                                </ion-text>
+                            </ng-template>
+                        </ionic-selectable>
+                    </ion-item>
+                    <ion-item *ngIf="abonado">
+                        <ion-label position="floating"> Nro Serie </ion-label>
+                        <ion-input name="nroSerie" type="text" [(ngModel)]="nroSerie"> </ion-input>
+                    </ion-item>
+                </ion-col>
+                <ion-col>
+                    <ion-button outline color="primary" (click)="scanner()">
+                        <ion-icon name="barcode"></ion-icon>
+                    </ion-button>
+                </ion-col>
+                <ion-col>
+                    <ion-button outline color="primary" (click)="camara()">
+                        <ion-icon name="camera"></ion-icon>
+                    </ion-button>
+                </ion-col>
+            </ion-row>
+
+            <ion-row *ngIf="tempImage">
+                <ion-col >
+                    <ion-card>
+                        <img [src]="tempImage" alt="imagen">
+                    </ion-card>
+                </ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col>
+                    <ion-item *ngIf="equipoSelected">
+                        <ion-label position="floating"> Nro Serie </ion-label>
+                        <ion-input name="desc" type="text" [(ngModel)]="equipoSelected.descripcion"> </ion-input>
+                    </ion-item>
+                </ion-col>
+            </ion-row>
+        </ion-list>
+
+        <ion-row class="ion-padding-vertical">
+            <ion-col size="6" class="ion-text-right">
+                <ion-button (click)="cancelAddEquipo()" color="danger" shape="round">
+                    Cancelar
+                </ion-button>
+            </ion-col>
+            <ion-col size="6" class="ion-text-left">
+                <ion-button type="submit" shape="round">
+                    Agregar
+                </ion-button>
+            </ion-col>
+        </ion-row>
+    </form>
+</ion-content>

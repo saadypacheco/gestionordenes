@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      Permitir tráfico HTTP (cleartext) SOLO hacia el backend legacy de alerthor.net.
+      El resto del tráfico de la app queda forzado a HTTPS por política de Android 9+.
+      Cuando el backend soporte TLS, eliminar este archivo y quitar usesCleartextTraffic del app.json.
+      Ver AGENTS.md §5 y docs/decisiones.md.
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">alerthor.net</domain>
+    </domain-config>
+</network-security-config>

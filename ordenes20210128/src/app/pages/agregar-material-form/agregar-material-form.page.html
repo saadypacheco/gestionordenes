@@ -1,0 +1,60 @@
+<ion-header no-border>
+  <ion-toolbar>
+      <ion-title text-capitalize> REGISTRAR MATERIAL</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-list>
+  <ion-item>
+      <ion-label class="ion-text-wrap">
+          <ion-text>
+              <b>Orden: {{orden.ordenId}} </b>
+              <p><b>Direccion:{{orden.calle}} {{orden.numero}}</b></p>
+              <p>Cliente: {{orden.cliente}}</p>
+          </ion-text>
+      </ion-label>
+  </ion-item>
+
+</ion-list>
+
+<ion-content class="ion-padding-top">
+  <form (ngSubmit)="saveNewMaterial(fMaterial)" #fMaterial="ngForm">
+      <ion-list>
+          <ion-item class="padding">
+              <ion-label position="floating"> Material </ion-label>
+              <ionic-selectable name="material" item-content slot [(ngModel)]="materialSelected" 
+              [items]="materiales" itemValueField="materialId" 
+              itemTextField="descripcion" 
+              [canSearch]="true" 
+              searchFailText="Lo sentimos no hay resultado " 
+              (onSearch)="buscarMaterial($event)">
+                  <ng-template ionicSelectableItemTemplate let-materialSelected="item">
+                      <ion-text class="ion-text-lowercase">
+                          {{materialSelected.codigoSap}} - {{materialSelected.descripcion}}
+                      </ion-text>
+                  </ng-template>
+              </ionic-selectable>
+          </ion-item>
+
+          <ion-item class="padding">
+              <ion-label position="floating"> Cantidad </ion-label>
+              <ion-input name="cantidad" type="tel" [(ngModel)]="cantidad" required> </ion-input>
+          </ion-item>
+
+      </ion-list>
+
+
+      <ion-row class="ion-padding-vertical">
+          <ion-col size="6" class="ion-text-right">
+              <ion-button (click)="cancelAddMaterial()" color="danger" shape="round">
+                  Cancelar
+              </ion-button>
+          </ion-col>
+          <ion-col size="6" class="ion-text-left">
+              <ion-button type="submit" shape="round">
+                  Guardar
+              </ion-button>
+          </ion-col>
+      </ion-row>
+  </form>
+</ion-content>

@@ -1,0 +1,47 @@
+<ion-content>
+    <!-- ({{orden.movilId}}) {{usuService.usuario.descripcion}} - {{usuService.usuario.Apellido}}  {{usuService.usuario.Nombre}} -->
+    <ion-list>
+
+        <ion-item [disabled]="orden.estadoId !=15">
+            <ion-label>Tipo Trabajo</ion-label>
+            <ion-select [(ngModel)]="orden.tipoTrabajoId" interface="popover" placeholder="seleccionar ..." required>
+                <ion-select-option *ngFor="let tipo of dataService.listaTipoTrabajo" [(value)]="tipo.tipoTrabajoId">{{tipo.descripcion}}</ion-select-option>
+            </ion-select>
+        </ion-item>
+
+        <!-- <ion-item-divider color="medium">
+            <ion-label>
+                <p> DATOS DEL CLIENTE </p>
+            </ion-label>
+        </ion-item-divider> -->
+        <ion-item [disabled]="orden.estadoId !=15">
+            <ion-label position="floating"> Cliente </ion-label>
+            <ion-input type="text" [(ngModel)]="orden.cliente" required> </ion-input>
+        </ion-item>
+        <ion-row>
+            <ion-col size="7">
+                <ion-item [disabled]="orden.estadoId !=15">
+                    <ion-label position="floating"> Calle </ion-label>
+                    <ion-input type="text" [(ngModel)]="orden.calle" required> </ion-input>
+                </ion-item>
+            </ion-col>
+            <ion-col>
+                <ion-item [disabled]="orden.estadoId !=15">
+                    <ion-label position="floating"> Nro. </ion-label>
+                    <ion-input type="tel" [(ngModel)]="orden.numero" required> </ion-input>
+                </ion-item>
+            </ion-col>
+        </ion-row>
+
+    </ion-list>
+
+    <ion-row>
+        <ion-col size="12" class="ion-text-center">
+            <ion-button (click)="saveNewOrden()" *ngIf="orden.estadoId ==15">
+                Guardar
+            </ion-button>
+        </ion-col>
+    </ion-row>
+
+
+</ion-content>

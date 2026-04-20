@@ -1,0 +1,40 @@
+.my-label {
+    font-size: 0.7em;
+}
+
+.bottonRow {
+    margin-top: -15px;
+}
+
+ion-toolbar {
+    --min-height: 10px!important;
+    --min-width: 10px !important;
+    vertical-align: middle;
+    font-size: 50%;
+}
+
+.ion-1x {
+    font-size: 12px !important;
+    color: #7d7d7d;
+}
+
+ion-segment-button {
+    //background: #2f32a0;
+    font-size: 10px;
+    color: rgb(255, 255, 255);
+    --border-radius: 1px;
+    ion-label {
+        margin: 0;
+    }
+}
+
+.segment-button-checked {
+    //background: #ffc900 !important;
+    color: #ffc900 !important;
+    ion-label {
+        color: #ffc900 !important;
+    }
+    ion-icon {
+        color: #ffc900 !important;
+    }
+}

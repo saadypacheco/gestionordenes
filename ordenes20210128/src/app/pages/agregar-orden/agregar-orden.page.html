@@ -1,0 +1,95 @@
+<ion-header>
+    <ion-toolbar>
+        <!-- <ion-buttons slot="start">
+            <ion-back-button defaultHref="/main/tabs/tab1"></ion-back-button>
+        </ion-buttons> -->
+
+        <ion-buttons>
+            <ion-button slot="start" (click)="cancelAddOrden()">
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+            <ion-title text-capitalize> REGISTRAR ORDEN</ion-title>
+            <ion-button>
+                <ion-datetime displayFormat="YYYY-MM-DD" disabled [(ngModel)]="orden.fechaInstalacion"></ion-datetime>
+            </ion-button>
+
+        </ion-buttons>
+
+    </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+    <!-- ({{orden.movilId}}) {{usuService.usuario.descripcion}} - {{usuService.usuario.Apellido}}  {{usuService.usuario.Nombre}} -->
+
+    <ion-list>
+        <!-- <ion-item>
+            <ion-label class="ion-text-wrap">
+                <ion-text>
+                    {{usuService.usuario.Apellido}} {{usuService.usuario.Nombre}} Movil: ({{orden.movilId}}) {{usuService.usuario.descripcion}}
+                </ion-text>
+            </ion-label>
+            <ion-label></ion-label>
+            <ion-datetime color="success" displayFormat="YYYY-MM-DD" disabled [(ngModel)]="orden.fechaInstalacion"></ion-datetime>
+        </ion-item> -->
+
+        <ion-item>
+            <ion-label position="floating"> Nro. Orden </ion-label>
+            <ion-input type="number" [(ngModel)]="orden.ordenId" required> </ion-input>
+        </ion-item>
+
+        <ion-item>
+            <ion-label>Tipo Trabajo</ion-label>
+            <ion-select [(ngModel)]="orden.tipoTrabajoId" interface="popover" placeholder="seleccionar ..." required>
+                <ion-select-option *ngFor="let tipo of dataService.listaTipoTrabajo" value={{tipo.tipoTrabajoId}}>{{tipo.descripcion}}</ion-select-option>
+            </ion-select>
+        </ion-item>
+
+        <ion-item-divider color="medium">
+            <ion-label>
+                <p> <b>DATOS DEL CLIENTE </b></p>
+            </ion-label>
+        </ion-item-divider>
+        <ion-row>
+            <ion-col>
+                <ion-item>
+                    <ion-label position="floating"> Cliente </ion-label>
+                    <ion-input type="text" [(ngModel)]="orden.cliente" required> </ion-input>
+                </ion-item>
+            </ion-col>
+
+        </ion-row>
+        <ion-row>
+            <ion-col size="7">
+                <ion-item>
+                    <ion-label position="floating"> Calle </ion-label>
+                    <ion-input type="text" [(ngModel)]="orden.calle" required> </ion-input>
+                </ion-item>
+            </ion-col>
+            <ion-col>
+                <ion-item>
+                    <ion-label position="floating"> Nro. </ion-label>
+                    <ion-input type="number" [(ngModel)]="orden.numero" required> </ion-input>
+                </ion-item>
+            </ion-col>
+        </ion-row>
+
+        <!-- <ion-input value="Disabled" disabled>estado</ion-input> -->
+        <ion-item-group>
+            <ion-item>
+                <ion-textarea [(ngModel)]="orden.comentarios" rows="6" cols="40" placeholder="Ingrese aqui sus comentarios..."></ion-textarea>
+            </ion-item>
+        </ion-item-group>
+    </ion-list>
+    <ion-row>
+        <ion-col size="6" class="ion-text-right">
+            <ion-button (click)="cancelAddOrden()" color="danger">
+                Cancelar
+            </ion-button>
+        </ion-col>
+        <ion-col size="6" class="ion-text-left">
+            <ion-button (click)="saveNewOrden()">
+                Guardar
+            </ion-button>
+        </ion-col>
+    </ion-row>
+</ion-content>

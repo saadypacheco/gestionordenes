@@ -1,0 +1,29 @@
+// :host {
+//     ion-content {
+//         --background: linear-gradient(135deg, var(--ion-color-dark), var(--ion-color-primary));
+//     }
+// }
+.mainSlide,
+.mainSlide ion-slide {
+    width: 100%;
+    height: 100%;
+    --background: linear-gradient(135deg, var(--ion-color-dark), var(--ion-color-primary));
+}
+
+img {
+    width: 120px;
+}
+
+.pick-avatar {
+    width: 80px;
+    opacity: 0.3;
+}
+
+.pick-avatar-seleccionado {
+    transition: opacity 0.5s linear;
+    opacity: 1 !important;
+}
+
+// ion-row {
+//     --ion-background-color: linear-gradient(135deg, var(--ion-color-dark), var(--ion-color-primary));
+// }

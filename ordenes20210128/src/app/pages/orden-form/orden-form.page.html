@@ -1,0 +1,63 @@
+<ion-header [translucent]="true">
+    <ion-toolbar>
+        <ion-title>ORDEN {{orden.ordenId}}</ion-title>
+        <ion-buttons slot="primary">
+            <!-- <ion-button expand="full" shape="round" (click)="gallery()">
+                <ion-icon slot="icon-only" name="images" color="success"></ion-icon>
+            </ion-button> -->
+            <ion-button expand="full" shape="round" (click)="saveAnularOrden()" [(disabled)]="disabledOrden">
+                <ion-icon slot="icon-only" name="trash" color="light"></ion-icon>
+            </ion-button>
+            <ion-button expand="full" shape="round" (click)="saveCloseOrden()" [(disabled)]="disabledOrden">
+                <ion-icon size="large" slot="icon-only" name="checkmark" color="tertiary"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+
+</ion-header>
+<ion-content padding>
+    <ion-toolbar mode="md" no-border-bottom no-border-top no-border>
+        <ion-segment value="Tareas" (ionChange)="segmentChanged($event)" scrollable=true>
+            <ion-segment-button value="Tareas">
+                <ion-icon size="small" name="construct-outline">></ion-icon>
+                <ion-label>Tareas</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="Equipos">
+                <ion-icon name="desktop-outline" size="small"></ion-icon>
+                <ion-label>Equipos</ion-label>
+            </ion-segment-button>
+
+            <ion-segment-button value="Recuperos">
+                <ion-icon name="download-outline" size="small"></ion-icon>
+                <ion-label>Recuperos</ion-label>
+            </ion-segment-button>
+
+            <ion-segment-button value="Materiales">
+                <ion-icon name="list-outline" size="small"></ion-icon>
+                <ion-label>Materiales</ion-label>
+            </ion-segment-button>
+
+            <ion-segment-button value="Comentarios">
+                <ion-icon name="document-attach-outline" size="small"></ion-icon>
+                <ion-label>Comentarios</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="Datos">
+                <ion-icon name="bookmark" size="small"></ion-icon>
+                <ion-label>Datos</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="Galeria">
+                <ion-icon name="images" size="small"></ion-icon>
+                <ion-label>Galeria</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+    </ion-toolbar>
+
+    <app-agregar-tarea *ngIf="segmentValue=='Tareas'" [orden]=orden> </app-agregar-tarea>
+    <app-datos-form *ngIf="segmentValue=='Datos'" [orden]=orden> </app-datos-form>
+    <app-comentarios-form *ngIf="segmentValue=='Comentarios'" [orden]=orden> </app-comentarios-form>
+    <app-agregar-equipo *ngIf="segmentValue=='Equipos'" [orden]=orden></app-agregar-equipo>
+    <app-agregar-recupero *ngIf="segmentValue=='Recuperos'" [orden]=orden></app-agregar-recupero>
+    <app-agregar-material *ngIf="segmentValue=='Materiales'" [orden]=orden></app-agregar-material>
+    <app-fotos *ngIf="segmentValue=='Galeria'" [orden]=orden></app-fotos>
+
+</ion-content>

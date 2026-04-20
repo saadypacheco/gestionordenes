@@ -1,0 +1,18 @@
+<ion-content>
+
+    <ion-list padding-top>
+        <ion-item [disabled]="orden.estadoId== 20">
+
+            <ion-textarea type="text" [(ngModel)]="orden.comentarios" rows="10" cols="50" placeholder="Ingrese aqui sus comentarios..."></ion-textarea>
+            <ion-textarea type="text"></ion-textarea>
+        </ion-item>
+
+        <ion-row>
+            <ion-col size="12" class="ion-text-center">
+                <ion-button (click)="saveNewOrden()" *ngIf="orden.estadoId== 15">
+                    Guardar
+                </ion-button>
+            </ion-col>
+        </ion-row>
+    </ion-list>
+</ion-content>
