@@ -76,8 +76,10 @@
     "extra": {
       "apiUrl": "http://alerthor.net:8777/api",
       "eas": {
-        "projectId": ""
-      }
-    }
+        "projectId": "06282507-b59d-49b6-8eed-437013c40bf0"
+      },
+      "router": {}
+    },
+    "owner": "saadypacheco"
   }
 }
