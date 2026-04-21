@@ -1,4 +1,4 @@
-import { ScrollView, Text } from 'react-native';
+import { ScrollView } from 'react-native';
 
 import { useOrdenContext } from '@/features/orden-detalle/OrdenContext';
 import { DatoRow } from '@/features/orden-detalle/datos/DatoRow';
@@ -50,16 +50,6 @@ export default function DatosTab() {
           <DatoRow label="Ubicación" valor={orden.ubicacion} multiline />
         </DatosSeccion>
       )}
-
-      <DatosSeccion titulo="Comentarios de cabecera">
-        {orden.comentarios.trim().length > 0 ? (
-          <DatoRow label="Nota" valor={orden.comentarios} multiline />
-        ) : (
-          <Text className="py-3 text-sm text-text-secondary">
-            Sin comentarios del despachador.
-          </Text>
-        )}
-      </DatosSeccion>
     </ScrollView>
   );
 }

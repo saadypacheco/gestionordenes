@@ -1,12 +1,30 @@
-import { View, Text } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { ScrollView } from 'react-native';
+import { MessageSquare } from 'lucide-react-native';
 
-export default function Comentarios() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  // TODO Fase 6 — integrar src/features/orden-detalle/comentarios
+import { useOrdenContext } from '@/features/orden-detalle/OrdenContext';
+import { ComentariosCard } from '@/features/orden-detalle/comentarios/ComentariosCard';
+import { TabEmptyState } from '@/features/orden-detalle/components/TabEmptyState';
+
+export default function ComentariosTab() {
+  const { orden } = useOrdenContext();
+  const texto = orden?.comentarios?.trim() ?? '';
+
+  if (texto.length === 0) {
+    return (
+      <TabEmptyState
+        icono={MessageSquare}
+        titulo="Sin comentarios"
+        descripcion="El despachador no dejó notas en esta orden."
+      />
+    );
+  }
+
   return (
-    <View className="flex-1 bg-surface-bg p-4">
-      <Text className="text-text-primary">Comentarios de la orden {id} (placeholder)</Text>
-    </View>
+    <ScrollView
+      className="flex-1 bg-surface-bg"
+      contentContainerStyle={{ padding: 12 }}
+    >
+      <ComentariosCard texto={texto} />
+    </ScrollView>
   );
 }

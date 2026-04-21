@@ -1,12 +1,30 @@
-import { View, Text } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { FlatList } from 'react-native';
+import { PackageSearch } from 'lucide-react-native';
 
-export default function Recuperos() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  // TODO Fase 6 — integrar src/features/orden-detalle/recuperos
+import { useOrdenContext } from '@/features/orden-detalle/OrdenContext';
+import { EquipoRow } from '@/features/orden-detalle/equipos/EquipoRow';
+import { TabEmptyState } from '@/features/orden-detalle/components/TabEmptyState';
+
+export default function RecuperosTab() {
+  const { orden } = useOrdenContext();
+  const recuperos = orden?.recuperos ?? [];
+
+  if (recuperos.length === 0) {
+    return (
+      <TabEmptyState
+        icono={PackageSearch}
+        titulo="Sin recuperos"
+        descripcion="Todavía no se registraron equipos recuperados."
+      />
+    );
+  }
+
   return (
-    <View className="flex-1 bg-surface-bg p-4">
-      <Text className="text-text-primary">Recuperos de la orden {id} (placeholder)</Text>
-    </View>
+    <FlatList
+      data={recuperos}
+      keyExtractor={(e, i) => `${e.imagenId ?? e.equipoId ?? 'r'}-${i}`}
+      contentContainerStyle={{ padding: 12, gap: 8 }}
+      renderItem={({ item }) => <EquipoRow equipo={item} contexto="recuperado" />}
+    />
   );
 }
