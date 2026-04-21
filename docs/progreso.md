@@ -48,13 +48,24 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `expo config` carga sin errores
 - [x] `git init` + primer commit + push a `origin/main` de https://github.com/saadypacheco/gestionordenes
 
-## Fase 2 — HTTP + parser backend
+## Fase 2 — HTTP + parser backend ✅
 
-- [ ] `src/api/client.ts` con timeout + retry + manejo de errores
-- [ ] `src/api/parsers.ts` que normaliza casing y unwraps `resp[0]`
-- [ ] Tipos en `src/domain/`
-- [ ] Tests de parsers con fixtures reales del backend
-- [ ] Documentar todos los endpoints en `docs/backend-endpoints.md`
+- [x] Tipos de dominio: `src/domain/{errores,usuario,orden,catalogos}.ts`
+- [x] `src/api/client.ts` con timeout + retry exponencial + errores tipados (`ApiError`)
+- [x] `src/api/parsers.ts` que normaliza todos los quirks del backend legacy:
+  - Unwrap `[[...]]` y `[[{}]]`
+  - Casing mixto (`Cantidad`/`cantidad`, `MAC`/`nroSerie`, `materialid`/`materialId`, `Descripcion`/`descripcion`)
+  - Normalización de fechas (`"2026-04-20T00:00:00"` → `"2026-04-20"`)
+  - `cliente: "undefined"` → `""`
+  - Boolean desde `1`/`0`/`true`/`false`/`"si"`/`"no"`
+- [x] Fixtures realistas en `src/api/__fixtures__/responses.ts`
+- [x] 23 tests nuevos en `src/api/parsers.test.ts` (36 en total contando los de constants)
+- [x] Endpoints tipados: `auth.ts`, `ordenes.ts`, `listas.ts`, `imagenes.ts`
+- [x] `docs/backend-endpoints.md` ya existía (de Fase 1.5)
+- [x] `pnpm typecheck` ✓
+- [x] `pnpm lint` ✓ (0 warnings)
+- [x] `pnpm test:ci` ✓ (36 tests)
+- [x] `pnpm dlx expo-doctor@latest` ✓ (17/17)
 
 ## Fase 3 — DB local (Drizzle)
 
