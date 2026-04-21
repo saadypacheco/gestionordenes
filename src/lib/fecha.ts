@@ -18,3 +18,27 @@ export function mismaFecha(a: string | null | undefined, b: string | null | unde
   if (!a || !b) return false;
   return a.substring(0, 10) === b.substring(0, 10);
 }
+
+/**
+ * Formato humano DD/MM/YYYY para display.
+ * Acepta `YYYY-MM-DD`, `YYYY-MM-DDTHH:mm:ss` o null. Si el string no matchea,
+ * lo devuelve tal cual.
+ */
+export function fechaDisplay(s: string | null | undefined): string {
+  if (!s) return '—';
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (!m) return s;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+
+/**
+ * Formato humano DD/MM/YYYY HH:mm para timestamps ISO.
+ * Acepta `YYYY-MM-DDTHH:mm:ss...` o null. No interpreta zona: se asume que el
+ * string ya está en la zona que queremos mostrar.
+ */
+export function fechaHoraDisplay(s: string | null | undefined): string {
+  if (!s) return '—';
+  const m = /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/.exec(s);
+  if (!m) return s;
+  return `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`;
+}
