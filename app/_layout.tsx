@@ -11,6 +11,14 @@ import {
   useBootstrapSession,
   useUsuario,
 } from '@/features/auth/useSession';
+import {
+  defineSyncTask,
+  registerBackgroundSync,
+} from '@/features/sync/background';
+
+// Definir el task a nivel módulo (antes del primer render) — requisito de
+// expo-task-manager para que el handler sobreviva cold starts del sistema.
+defineSyncTask();
 
 /**
  * Root layout:
@@ -55,6 +63,14 @@ function AppReady() {
       router.replace('/(tabs)');
     }
   }, [initializing, usuario, segments, router]);
+
+  // Background sync: solo cuando hay usuario logueado.
+  useEffect(() => {
+    if (!usuario) return;
+    void registerBackgroundSync().catch(() => {
+      /* best-effort; no bloqueamos el arranque si el OS no lo permite */
+    });
+  }, [usuario]);
 
   if (initializing) {
     return <LoadingScreen mensaje="Cargando sesión…" />;

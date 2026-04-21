@@ -70,21 +70,22 @@ export default function GaleriaTab() {
   };
 
   const onEliminarFoto = (foto: OrdenImagen) => {
-    Alert.alert('Eliminar foto', '¿Querés eliminar esta foto?', [
+    const yaSubida = foto.subida === true;
+    const mensaje = yaSubida
+      ? '¿Eliminar esta foto? Se va a borrar también del servidor al sincronizar.'
+      : '¿Eliminar esta foto?';
+    Alert.alert('Eliminar foto', mensaje, [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Eliminar',
         style: 'destructive',
         onPress: async () => {
-          const { bloqueada } = await quitar(foto);
-          if (bloqueada) {
-            Alert.alert(
-              'No se puede eliminar',
-              'Esta foto ya fue sincronizada con el servidor.',
-            );
-            return;
+          try {
+            await quitar(foto);
+            cerrar();
+          } catch {
+            Alert.alert('Error', error ?? 'No pudimos eliminar la foto.');
           }
-          cerrar();
         },
       },
     ]);
