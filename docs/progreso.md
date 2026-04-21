@@ -174,19 +174,18 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `equipos.tsx` — FAB "+" abre modal, long/tap a trash pide confirmación y quita
 - [x] 96 tests verdes / typecheck / lint (sin warnings) / bundle 7.28 MB ✓
 
-### Fase 6G.2 — Galería (write) 🔜
+### Fase 6G.2 — Galería (write) ✅
 
-> Tomar foto, comprimir, guardar path local, encolar upload. Tope `MAX_FOTOS_POR_ORDEN = 5`.
-
-Scope:
-
-- [ ] `src/features/orden-detalle/galeria/useCamara.ts` — pide permiso, abre `CameraView` fullscreen, botón disparo
-- [ ] `src/features/orden-detalle/galeria/CamaraModal.tsx` — fullscreen con guía + preview tras el disparo + confirmar/repetir
-- [ ] `src/lib/fotos.ts` — `procesarFoto(uri)`: pipeline con `expo-image-manipulator` (resize al lado más largo = `FOTO_MAX_LADO_PX` = 1600, `jpeg` quality `FOTO_JPEG_QUALITY` = 0.7), devuelve path persistente via `expo-file-system` en `FileSystem.documentDirectory + ordenes/{ordenId}/{uuid}.jpg`
-- [ ] `src/features/orden-detalle/galeria/useAgregarFoto.ts` — write: genera `imagenId` con `expo-crypto.randomUUID()`, procesa foto, inserta `OrdenImagen` (imagen = path local, mime `image/jpeg`), `saveOrden`, enqueue `subir_foto` en `sync_queue`, refresca context
-- [ ] Extender `galeria.tsx`: FAB "+" si `imagenes.length < 5`. Al tap en `FotoModal` → botón "Eliminar foto" (soft delete via `estadoId` o remove local — definir en §12 de AGENTS.md)
-- [ ] `imagenToUri` ya soporta `file://` — la galería cachea bien
-- [ ] Tests: `procesarFoto` con mock de image-manipulator, cálculo de ruta, validación del tope de 5
+- [x] **Domain**: `OrdenImagen.subida?: boolean` (undefined = true para compat backend)
+- [x] **Mapper fix** (`src/db/mappers.ts`): `toOrdenImagenRow` routea `file://` a `imagenUri` y base64 a `imagenBase64`; `subida` default depende de isLocal (local→false, base64→true) pero respeta override explícito. `fromOrdenImagenRow` prefiere `imagenUri` sobre `imagenBase64`. +4 tests
+- [x] **Repo** (`ordenes.ts`): `removeImagenLocal(ordenId, imagenId)` — delete físico de una imagen, marca orden `sincronizado=false`
+- [x] **Pipeline** (`galeria/fotos.ts`): `dimensionesResize` puro + 6 tests, `procesarYGuardarFoto`: `manipulateAsync` para leer dimensiones reales → resize a lado-máximo 1600px + JPEG quality 0.7 → move al `Paths.document/ordenes/{ordenId}/{uuid}.jpg`
+- [x] **Mutations** (`galeria/useFotosMutations.ts`): `agregar(sourceUri)` — genera UUID con `expo-crypto.randomUUID()`, procesa foto, `saveOrden` con `sincronizado=false`, `enqueueSubirImagen`, rollback de archivo si falla. Tope `MAX_FOTOS_POR_ORDEN = 5`. `quitar(imagen)` solo si `subida !== true`, borra archivo del fs.
+- [x] **UI**:
+  - `CamaraModal.tsx` — `CameraView` + shutter 20×20px, preview post-shot con Repetir / Usar foto + loading en el confirm
+  - `FotoModal.tsx` extendido con chip "Sincronizada" y botón de trash cuando `subida !== true`
+  - `galeria.tsx` — FAB con `Camera` icon, header con contador `N/5 fotos`, Alert de tope y error handling
+- [x] 106 tests verdes / typecheck / lint clean / bundle 7.34 MB ✓
 
 ### Fase 7 — Extensiones M6 🔜
 
