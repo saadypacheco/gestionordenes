@@ -133,11 +133,16 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] 8 tests nuevos (fecha) → **80 tests verdes**
 - [x] typecheck / lint / expo-doctor 17/17 / bundle 7.2 MB ✓
 
+### Fase 6C — Tab Materiales (read-only) ✅
+
+- [x] `src/features/orden-detalle/materiales/MaterialRow.tsx` — descripción + badge cantidad + chips de serie (`#nroSerie`) y medida (`ini → fin`)
+- [x] `app/orden/[id]/materiales.tsx` — FlatList + `TabEmptyState` con ícono `Package`
+- [x] typecheck / lint / test:ci (80) / bundle 7.21 MB ✓
+
 ### Pendientes Fase 6
 
 - [ ] Tab Equipos (con barcode scanner)
 - [ ] Tab Recuperos
-- [ ] Tab Materiales
 - [ ] Tab Comentarios
 - [ ] Tab Galería (con cámara + upload diferido)
 
