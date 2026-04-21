@@ -83,12 +83,21 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `pnpm test:ci` ✓ (46 tests: 13 constants + 23 parsers + 10 mappers)
 - [x] `pnpm dlx expo-doctor@latest` ✓ (17/17)
 
-## Fase 4 — Auth
+## Fase 4 — Auth ✅
 
-- [ ] Pantalla `login.tsx`
-- [ ] `useLogin` con online + fallback offline del día
-- [ ] Guard en root layout (redirige a `/login` si no hay sesión)
-- [ ] `expo-secure-store` para hash derivado (no pass en plano)
+- [x] `src/lib/hash.ts` — SHA-256 via expo-crypto (7 tests)
+- [x] `src/lib/fecha.ts` — helpers `fechaHoyStr`, `mismaFecha` (7 tests)
+- [x] `src/db/repositories/usuarios.ts` — saveSesion, getSesion, getSesionConHash, clearSesion
+- [x] `src/stores/authStore.ts` — Zustand con `usuario` + `initializing`
+- [x] `src/features/auth/validators.ts` — zod schema del form
+- [x] `src/features/auth/useSession.ts` — `useBootstrapSession` (lee DB al arrancar, invalida si es de otro día), `useUsuario`, `useAuthInitializing`
+- [x] `src/features/auth/useLogin.ts` — mutation online con fallback offline del día (hash local)
+- [x] `src/features/auth/useLogout.ts` — limpia sesión, conserva órdenes
+- [x] `app/login.tsx` — form real con react-hook-form + zod, loading state, mensajes de error en español
+- [x] `app/_layout.tsx` — `useDbMigrations` + session guard con `router.replace`
+- [x] `app/(tabs)/_layout.tsx` — header right con nombre del usuario + botón logout (ícono Lucide)
+- [x] **60 tests verdes** (13 constants + 23 parsers + 10 mappers + 7 hash + 7 fecha)
+- [x] `pnpm typecheck` / `pnpm lint` / `pnpm dlx expo-doctor` ✓
 
 ## Fase 5 — Listado de órdenes
 
