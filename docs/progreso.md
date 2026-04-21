@@ -162,39 +162,86 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `galeria/FotoModal.tsx` — modal fullscreen con botón cerrar
 - [x] `app/orden/[id]/galeria.tsx` — grid 3 columnas + modal al tap
 
-### Pendientes Fase 6 (sub-fases con write operations)
+### Fase 6F.2 — Equipos (write) 🔜
 
-- [ ] **6F.2 — Equipos (write)**: agregar/quitar equipos con barcode scanner (`expo-camera` + permisos + form + save a DB). Se engancha con `EquipoRow`.
-- [ ] **6G.2 — Galería (write)**: tomar foto con `expo-camera`, compresión a 1600px + JPEG 70 con `expo-image-manipulator`, guardar path local, encolar upload en `sync_queue` (queda fire-and-forget hasta Fase 8). Tope: `MAX_FOTOS_POR_ORDEN` (5).
+> Agregar / quitar equipos al `orden.equipos`. Todas las deps ya están instaladas (`expo-camera`, `expo-barcode-scanner` vía camera API).
 
-## Fase 7 — Extensiones (M6)
+Scope:
 
-- [ ] GPS al cerrar (`expo-location`)
-- [ ] Timestamps inicio/fin
-- [ ] Firma del cliente (canvas + upload como imagen)
+- [ ] `src/features/orden-detalle/equipos/useScanner.ts` — hook que pide permiso (`Camera.requestCameraPermissionsAsync`), abre modal con `CameraView` en modo `barcodeScanner`, debounce y validación del código
+- [ ] `src/features/orden-detalle/equipos/ScannerModal.tsx` — fullscreen modal con marco visual + overlay "Apuntá al código", botón cerrar
+- [ ] `src/features/orden-detalle/equipos/EquipoForm.tsx` — form manual (react-hook-form + zod): nroSerie (required), descripción, abonado (switch). Precarga si viene desde scanner
+- [ ] `src/features/orden-detalle/equipos/useAgregarEquipo.ts` — write: actualiza el `Orden.equipos` en memoria, llama `saveOrden` (marca `sincronizado=false`), enqueue en `sync_queue` (tipo `grabar_orden`, modo `ModoGrabado.Equipos = 6`), refresca context con `reload`
+- [ ] Extender `equipos.tsx`: FAB inferior "+" → abre modal con dos tabs (Escanear / Manual). Swipe-to-delete en `EquipoRow` (o botón ✕) → confirm + write
+- [ ] Integración catálogo: si el `nroSerie` matchea un `catEquipos`, precarga descripción + abonado automáticamente
+- [ ] Tests: helpers de validación (zod schema), mapper de nuevo equipo → row
+- [ ] Config Android: verificar `android.permission.CAMERA` en `expo-camera` plugin (ya viene por default)
 
-## Fase 8 — Sincronización
+### Fase 6G.2 — Galería (write) 🔜
 
-- [ ] `syncWorker` on-demand
-- [ ] Background task con `expo-background-fetch`
-- [ ] Retry + backoff
+> Tomar foto, comprimir, guardar path local, encolar upload. Tope `MAX_FOTOS_POR_ORDEN = 5`.
+
+Scope:
+
+- [ ] `src/features/orden-detalle/galeria/useCamara.ts` — pide permiso, abre `CameraView` fullscreen, botón disparo
+- [ ] `src/features/orden-detalle/galeria/CamaraModal.tsx` — fullscreen con guía + preview tras el disparo + confirmar/repetir
+- [ ] `src/lib/fotos.ts` — `procesarFoto(uri)`: pipeline con `expo-image-manipulator` (resize al lado más largo = `FOTO_MAX_LADO_PX` = 1600, `jpeg` quality `FOTO_JPEG_QUALITY` = 0.7), devuelve path persistente via `expo-file-system` en `FileSystem.documentDirectory + ordenes/{ordenId}/{uuid}.jpg`
+- [ ] `src/features/orden-detalle/galeria/useAgregarFoto.ts` — write: genera `imagenId` con `expo-crypto.randomUUID()`, procesa foto, inserta `OrdenImagen` (imagen = path local, mime `image/jpeg`), `saveOrden`, enqueue `subir_foto` en `sync_queue`, refresca context
+- [ ] Extender `galeria.tsx`: FAB "+" si `imagenes.length < 5`. Al tap en `FotoModal` → botón "Eliminar foto" (soft delete via `estadoId` o remove local — definir en §12 de AGENTS.md)
+- [ ] `imagenToUri` ya soporta `file://` — la galería cachea bien
+- [ ] Tests: `procesarFoto` con mock de image-manipulator, cálculo de ruta, validación del tope de 5
+
+### Fase 7 — Extensiones M6 🔜
+
+> Requieren que Fase 6F.2 y 6G.2 estén cerradas porque dependen de write en orden.
+
+- [ ] `src/features/orden-detalle/useIniciarOrden.ts` — setea `iniciadaAt` (`new Date().toISOString()`) + `saveOrden` + enqueue
+- [ ] `src/features/orden-detalle/useCerrarOrden.ts` — setea `cerradaAt`, captura GPS (`expo-location`, `Accuracy.Balanced`, timeout `GPS_TIMEOUT_MS` = 8s), guarda en `orden.ubicacion` como `"lat,lng"`, `saveOrden`, enqueue
+- [ ] `src/features/orden-detalle/firma/FirmaCanvas.tsx` — canvas con `react-native-signature-canvas` (agregar dep — confirmar con el usuario) o alternativa con `react-native-gesture-handler` + SVG. Exporta base64 → se inserta como `OrdenImagen` con flag diferenciador
+- [ ] Botones en header: "Iniciar" / "Cerrar" según `estadoId`
+- [ ] Tab Datos: mostrar timestamps cuando existan (ya hay sección "Extensiones M6" preparada)
+
+### Fase 8 — Sincronización 🔜
+
+- [ ] `src/features/sync/syncWorker.ts` — itera `sync_queue`, según `tipo`:
+  - `grabar_orden` → POST `/ordenes/grabarSincronizar` con el modo correcto
+  - `subir_foto` → POST `/imagenes/subir` con base64 desde el path local
+- [ ] Retry con backoff exponencial (usa `HTTP_RETRY_INTENTOS` + `HTTP_TIMEOUT_MS` del `client.ts`)
+- [ ] Background task con `expo-background-fetch` + `expo-task-manager`, intervalo `SYNC_BACKGROUND_INTERVAL_MIN = 15`
+- [ ] Tab "Sincronizar" (`app/(tabs)/sync.tsx`): botón manual + status (pendientes, última sync OK, último error) + banner NetInfo
+- [ ] Política: si después de N intentos falla, marca `attemptFailed` con error, se queda en la cola para retry manual
+- [ ] Al marcar una orden sincronizada, refrescar desde backend con `/ordenes/listar` para reconciliar IDs nuevos (equipos/fotos creados en server)
+- [ ] Tests: mock `fetch`, verificar retry/backoff, verificar que imagen local se borra solo al confirmar upload
 
 ## Fase 9 — Build + distribución
 
-- [ ] EAS Build preview (APK)
+- [ ] EAS Build preview (APK) — ✅ pipeline ya anda, pendiente verificar APK actual en celular
 - [ ] Test en dispositivo real (pendiente: conseguir un instalador)
 - [ ] Iteración de feedback
 - [ ] Build de producción
 
 ## Fase 10 — Hardening
 
-- [ ] Logs locales rotables
-- [ ] Sentry (si se confirma)
-- [ ] OTA updates (si se confirma)
+- [ ] Logs locales rotables (archivo diario en `documentDirectory/logs/`)
+- [ ] Sentry (si se confirma en §12 de AGENTS.md)
+- [ ] OTA updates con `expo-updates` (si se confirma)
 - [ ] Documentación de deploy
 
 ---
 
+## Roadmap resumen
+
+| Fase | Estado | Depende de |
+|------|--------|-----------|
+| 6A–6E | ✅ mergeado (PR #11, PR #13/14 abiertos) | — |
+| 6F–6G read-only | ✅ (PR #15 abierto) | — |
+| 6F.2 Equipos write | 🔜 | EquipoRow (hecho), scanner nuevo |
+| 6G.2 Galería write | 🔜 | FotoThumb/FotoModal (hechos), procesador de foto nuevo |
+| 7 Extensiones M6 | 🔜 | 6F.2 + 6G.2 (ambas usan el mismo patrón de write+enqueue) |
+| 8 Sync worker | 🔜 | Fase 7 cerrada (sync_queue con items reales) |
+| 9 Build prod | 🔜 | Feedback de APK actual (preview) |
+| 10 Hardening | 🔜 | Fase 9 estabilizada |
+
 ## Bloqueos actuales
 
-Ninguno. Listo para arrancar Fase 1 al confirmar el plan de scaffold.
+- ⏳ EAS build `7e704f5e` del release 6A+6B sigue **in queue** desde 11:59 — normalmente tarda pocos minutos, la cola parece lenta. Sin APK todavía no hay validación manual en dispositivo.
