@@ -150,10 +150,22 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `src/features/orden-detalle/equipos/EquipoRow.tsx` — componente **compartido** para Equipos + Recuperos: thumb de imagen (o fallback `ImageOff`) + descripción + chip de nro de serie + chip de abonado contextual
 - [x] `app/orden/[id]/recuperos.tsx` — FlatList + `TabEmptyState` con ícono `PackageSearch`
 
-### Pendientes Fase 6
+### Fase 6F — Tab Equipos (read-only) ✅
 
-- [ ] Tab Equipos (reutiliza `EquipoRow`; agrega barcode scanner — Fase 6F)
-- [ ] Tab Galería (con cámara + upload diferido — Fase 6G)
+- [x] `app/orden/[id]/equipos.tsx` — reusa `EquipoRow` con `contexto="instalado"` sobre `orden.equipos`
+- [x] Empty state con ícono `Boxes`
+
+### Fase 6G — Tab Galería (read-only) ✅
+
+- [x] `src/lib/imagen.ts` — helper `imagenToUri` (base64 → data URI, pass-through para `file://`/`data:`) + tests
+- [x] `galeria/FotoThumb.tsx` — thumbnail cuadrado con fallback `ImageOff`
+- [x] `galeria/FotoModal.tsx` — modal fullscreen con botón cerrar
+- [x] `app/orden/[id]/galeria.tsx` — grid 3 columnas + modal al tap
+
+### Pendientes Fase 6 (sub-fases con write operations)
+
+- [ ] **6F.2 — Equipos (write)**: agregar/quitar equipos con barcode scanner (`expo-camera` + permisos + form + save a DB). Se engancha con `EquipoRow`.
+- [ ] **6G.2 — Galería (write)**: tomar foto con `expo-camera`, compresión a 1600px + JPEG 70 con `expo-image-manipulator`, guardar path local, encolar upload en `sync_queue` (queda fire-and-forget hasta Fase 8). Tope: `MAX_FOTOS_POR_ORDEN` (5).
 
 ## Fase 7 — Extensiones (M6)
 
