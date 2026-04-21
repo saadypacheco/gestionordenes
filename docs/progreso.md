@@ -48,27 +48,56 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `expo config` carga sin errores
 - [x] `git init` + primer commit + push a `origin/main` de https://github.com/saadypacheco/gestionordenes
 
-## Fase 2 — HTTP + parser backend
+## Fase 2 — HTTP + parser backend ✅
 
-- [ ] `src/api/client.ts` con timeout + retry + manejo de errores
-- [ ] `src/api/parsers.ts` que normaliza casing y unwraps `resp[0]`
-- [ ] Tipos en `src/domain/`
-- [ ] Tests de parsers con fixtures reales del backend
-- [ ] Documentar todos los endpoints en `docs/backend-endpoints.md`
+- [x] Tipos de dominio: `src/domain/{errores,usuario,orden,catalogos}.ts`
+- [x] `src/api/client.ts` con timeout + retry exponencial + errores tipados (`ApiError`)
+- [x] `src/api/parsers.ts` que normaliza todos los quirks del backend legacy:
+  - Unwrap `[[...]]` y `[[{}]]`
+  - Casing mixto (`Cantidad`/`cantidad`, `MAC`/`nroSerie`, `materialid`/`materialId`, `Descripcion`/`descripcion`)
+  - Normalización de fechas (`"2026-04-20T00:00:00"` → `"2026-04-20"`)
+  - `cliente: "undefined"` → `""`
+  - Boolean desde `1`/`0`/`true`/`false`/`"si"`/`"no"`
+- [x] Fixtures realistas en `src/api/__fixtures__/responses.ts`
+- [x] 23 tests nuevos en `src/api/parsers.test.ts` (36 en total contando los de constants)
+- [x] Endpoints tipados: `auth.ts`, `ordenes.ts`, `listas.ts`, `imagenes.ts`
+- [x] `docs/backend-endpoints.md` ya existía (de Fase 1.5)
+- [x] `pnpm typecheck` ✓
+- [x] `pnpm lint` ✓ (0 warnings)
+- [x] `pnpm test:ci` ✓ (36 tests)
+- [x] `pnpm dlx expo-doctor@latest` ✓ (17/17)
 
-## Fase 3 — DB local (Drizzle)
+## Fase 3 — DB local (Drizzle) ✅
 
-- [ ] Schema: `ordenes`, `orden_tareas`, `orden_equipos`, `orden_materiales`, `orden_recuperos`, `orden_imagenes`, catálogos, `sync_queue`
-- [ ] Migración inicial + script `drizzle-kit`
-- [ ] Repositorios tipados
-- [ ] Tests de repositorios
+- [x] Schema: `usuarios`, `ordenes`, `orden_tareas`, `orden_equipos` (con flag `tipo` instalado/recuperado), `orden_materiales`, `orden_imagenes`, 4 `cat_*`, `sync_queue` (11 tablas totales)
+- [x] Migración inicial `0000_tidy_pride.sql` generada con `pnpm db:generate`
+- [x] `src/db/client.ts` — Drizzle sobre expo-sqlite, archivo `gestion-ordenes.db`
+- [x] `src/db/migrate.ts` — hook `useDbMigrations` (a conectar al root layout en Fase 4)
+- [x] `src/db/mappers.ts` — conversión `Orden ↔ row` pura + 10 tests de roundtrip
+- [x] `src/db/repositories/ordenes.ts` — `saveOrden` (transaccional, replace sub-colecciones, preserva imágenes por UUID), `getOrden`, `listOrdenes`, `listOrdenesPendientesSync`, `markOrdenSincronizada`
+- [x] `src/db/repositories/catalogos.ts` — replace + get para 4 catálogos
+- [x] `src/db/repositories/syncQueue.ts` — enqueue (con dedup para grabar_orden), listPending, removeItem, markAttemptFailed
+- [x] Normalización `Orden.numero: string | null` (antes `number | string | null`) — el backend mezcla, la DB guarda text, el dominio unifica
+- [x] `pnpm typecheck` ✓
+- [x] `pnpm lint` ✓ (0 warnings)
+- [x] `pnpm test:ci` ✓ (46 tests: 13 constants + 23 parsers + 10 mappers)
+- [x] `pnpm dlx expo-doctor@latest` ✓ (17/17)
 
-## Fase 4 — Auth
+## Fase 4 — Auth ✅
 
-- [ ] Pantalla `login.tsx`
-- [ ] `useLogin` con online + fallback offline del día
-- [ ] Guard en root layout (redirige a `/login` si no hay sesión)
-- [ ] `expo-secure-store` para hash derivado (no pass en plano)
+- [x] `src/lib/hash.ts` — SHA-256 via expo-crypto (7 tests)
+- [x] `src/lib/fecha.ts` — helpers `fechaHoyStr`, `mismaFecha` (7 tests)
+- [x] `src/db/repositories/usuarios.ts` — saveSesion, getSesion, getSesionConHash, clearSesion
+- [x] `src/stores/authStore.ts` — Zustand con `usuario` + `initializing`
+- [x] `src/features/auth/validators.ts` — zod schema del form
+- [x] `src/features/auth/useSession.ts` — `useBootstrapSession` (lee DB al arrancar, invalida si es de otro día), `useUsuario`, `useAuthInitializing`
+- [x] `src/features/auth/useLogin.ts` — mutation online con fallback offline del día (hash local)
+- [x] `src/features/auth/useLogout.ts` — limpia sesión, conserva órdenes
+- [x] `app/login.tsx` — form real con react-hook-form + zod, loading state, mensajes de error en español
+- [x] `app/_layout.tsx` — `useDbMigrations` + session guard con `router.replace`
+- [x] `app/(tabs)/_layout.tsx` — header right con nombre del usuario + botón logout (ícono Lucide)
+- [x] **60 tests verdes** (13 constants + 23 parsers + 10 mappers + 7 hash + 7 fecha)
+- [x] `pnpm typecheck` / `pnpm lint` / `pnpm dlx expo-doctor` ✓
 
 ## Fase 5 — Listado de órdenes
 
