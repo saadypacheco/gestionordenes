@@ -1,12 +1,30 @@
-import { View, Text } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { FlatList } from 'react-native';
+import { ListChecks } from 'lucide-react-native';
 
-export default function Tareas() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  // TODO Fase 6 — integrar src/features/orden-detalle/tareas
+import { useOrdenContext } from '@/features/orden-detalle/OrdenContext';
+import { TareaRow } from '@/features/orden-detalle/tareas/TareaRow';
+import { TabEmptyState } from '@/features/orden-detalle/components/TabEmptyState';
+
+export default function TareasTab() {
+  const { orden } = useOrdenContext();
+  const tareas = orden?.tareas ?? [];
+
+  if (tareas.length === 0) {
+    return (
+      <TabEmptyState
+        icono={ListChecks}
+        titulo="Sin tareas"
+        descripcion="Esta orden no tiene tareas asignadas."
+      />
+    );
+  }
+
   return (
-    <View className="flex-1 bg-surface-bg p-4">
-      <Text className="text-text-primary">Tareas de la orden {id} (placeholder)</Text>
-    </View>
+    <FlatList
+      data={tareas}
+      keyExtractor={(t) => String(t.tareaId)}
+      contentContainerStyle={{ padding: 12, gap: 8 }}
+      renderItem={({ item }) => <TareaRow tarea={item} />}
+    />
   );
 }

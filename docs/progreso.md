@@ -112,13 +112,33 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 
 ## Fase 6 — Detalle de orden
 
-- [ ] Layout con 7 sub-tabs
-- [ ] Tab Tareas (plantilla de referencia para las demás)
+### Fase 6A — Layout + tab Tareas (plantilla) ✅
+
+- [x] `src/features/orden-detalle/useOrdenDetalle.ts` — hook offline-first (DB-only; remoto llega en Fase 8)
+- [x] `src/features/orden-detalle/OrdenContext.tsx` — provider + `useOrdenContext()` para compartir orden entre sub-tabs
+- [x] `HeaderOrden` (cliente + dirección + badge estado + back + chip "Pendiente"), `DetalleLoading`, `DetalleNotFound`, `TabEmptyState` reusable
+- [x] `tareas/TareaRow.tsx` read-only (descripción + cantidad)
+- [x] `app/orden/[id]/_layout.tsx` envuelve `Tabs` con `OrdenProvider` + header custom + gate loading/notFound
+- [x] `app/_layout.tsx` quita header del Stack para `orden/[id]` (usamos el nuestro)
+- [x] `app/orden/[id]/tareas.tsx` FlatList + empty state
+- [x] `pnpm typecheck` / `pnpm lint` / `pnpm test:ci` (72 tests) / `pnpm dlx expo-doctor` (17/17) ✓
+- [x] `pnpm exec expo export --platform android` ✓ (bundle 7.19 MB OK)
+
+### Fase 6B — Tab Datos (read-only) ✅
+
+- [x] `src/lib/fecha.ts` — helpers `fechaDisplay` (DD/MM/YYYY) y `fechaHoraDisplay` (DD/MM/YYYY HH:mm), ambos null-safe con fallback `—`
+- [x] `src/features/orden-detalle/datos/DatoRow.tsx` — label/valor con fallback `—`, soporta multiline
+- [x] `src/features/orden-detalle/datos/DatosSeccion.tsx` — grupo titulado estilo card
+- [x] `app/orden/[id]/datos.tsx` — ScrollView con secciones: Identificación, Domicilio, Fechas, Responsables, Extensiones M6 (si hay), Comentarios de cabecera
+- [x] 8 tests nuevos (fecha) → **80 tests verdes**
+- [x] typecheck / lint / expo-doctor 17/17 / bundle 7.2 MB ✓
+
+### Pendientes Fase 6
+
 - [ ] Tab Equipos (con barcode scanner)
 - [ ] Tab Recuperos
 - [ ] Tab Materiales
 - [ ] Tab Comentarios
-- [ ] Tab Datos
 - [ ] Tab Galería (con cámara + upload diferido)
 
 ## Fase 7 — Extensiones (M6)
