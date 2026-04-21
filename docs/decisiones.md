@@ -120,6 +120,41 @@ Formato: fecha → decisión → alternativas consideradas → motivo.
 
 ---
 
+## 2026-04-20 — `node-linker=hoisted` en `.npmrc` (pnpm + RN + NativeWind)
+
+**Problema:** El primer EAS build falló en la fase `EAGER_BUNDLE` con
+`Unable to resolve module react-native-css-interop/jsx-runtime from app/(tabs)/sync.tsx`.
+Metro (el bundler de RN) no puede traversar el node_modules virtual de pnpm para
+encontrar subpaths como `react-native-css-interop/jsx-runtime`, que el babel plugin
+de NativeWind 4 emite al usar `jsxImportSource: 'nativewind'`.
+
+**Alternativas:**
+- A. `public-hoist-pattern[]=*nativewind*` + `*react-native-css-interop*` — quirúrgico.
+- B. `node-linker=hoisted` — pnpm se comporta como npm (node_modules plano).
+- C. Mover a npm/yarn — tiramos la decisión inicial de pnpm.
+
+**Decisión: B.** `node-linker=hoisted`.
+
+**Motivo:** Metro + Expo Router + NativeWind + (y probablemente libs futuras como
+barcode scanners con bridges nativos) comparten la misma limitación: no entienden
+pnpm virtual store. Parchear caso por caso con `public-hoist-pattern` obliga a
+tocar `.npmrc` cada vez que suma una lib. `node-linker=hoisted` elimina la clase
+entera de problemas a cambio de perder un pelo de eficiencia de disco (hardlinks).
+Para una app de scope pequeño vale la pena.
+
+## 2026-04-20 — `eas-cli` NO como devDep
+
+`expo-doctor` marca que instalar `eas-cli` como dependencia del proyecto causa
+conflictos. La recomendación oficial es usarlo vía `pnpm dlx eas-cli <comando>`
+o global. Lo movimos fuera del `package.json`.
+
+## 2026-04-20 — Propiedades nativas via `expo-build-properties`
+
+Campos como `android.minSdkVersion`, `android.usesCleartextTraffic`,
+`ios.deploymentTarget` **no van top-level en `app.json`** — van dentro de las
+opciones del plugin `expo-build-properties`. `expo-doctor` falla si están mal
+ubicados. Ver `app.json` → `plugins` → `expo-build-properties`.
+
 ## 2026-04-20 — Features nuevas: GPS + firma + timestamps
 
 Se agregan sin tocar el contrato del backend:
