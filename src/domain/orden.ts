@@ -51,7 +51,9 @@ export type Orden = {
   clienteId: string | null;
   cliente: string;
   calle: string;
-  numero: number | string | null;
+  /** Número de puerta — siempre string porque el backend mezcla number y string,
+   *  y SQLite local lo guarda como text. El parser normaliza. */
+  numero: string | null;
   domicilio: string | null;
   sector: string | null;
   /** `YYYY-MM-DD` (se normaliza al parsear). */

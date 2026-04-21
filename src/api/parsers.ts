@@ -181,7 +181,7 @@ export function parseOrden(obj: Dict): Orden {
     clienteId: pickStr(obj, 'clienteID', 'clienteId'),
     cliente: pickStr(obj, 'cliente') ?? '',
     calle: pickStr(obj, 'calle') ?? '',
-    numero: (pick(obj, 'numero') ?? null) as Orden['numero'],
+    numero: pickStr(obj, 'numero'),
     domicilio: pickStr(obj, 'Domicilio', 'domicilio'),
     sector: pickStr(obj, 'Sector', 'sector'),
     fechaInstalacion: normalizeFecha(pickStr(obj, 'fechaInstalacion')) ?? '',

@@ -67,12 +67,21 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `pnpm test:ci` ✓ (36 tests)
 - [x] `pnpm dlx expo-doctor@latest` ✓ (17/17)
 
-## Fase 3 — DB local (Drizzle)
+## Fase 3 — DB local (Drizzle) ✅
 
-- [ ] Schema: `ordenes`, `orden_tareas`, `orden_equipos`, `orden_materiales`, `orden_recuperos`, `orden_imagenes`, catálogos, `sync_queue`
-- [ ] Migración inicial + script `drizzle-kit`
-- [ ] Repositorios tipados
-- [ ] Tests de repositorios
+- [x] Schema: `usuarios`, `ordenes`, `orden_tareas`, `orden_equipos` (con flag `tipo` instalado/recuperado), `orden_materiales`, `orden_imagenes`, 4 `cat_*`, `sync_queue` (11 tablas totales)
+- [x] Migración inicial `0000_tidy_pride.sql` generada con `pnpm db:generate`
+- [x] `src/db/client.ts` — Drizzle sobre expo-sqlite, archivo `gestion-ordenes.db`
+- [x] `src/db/migrate.ts` — hook `useDbMigrations` (a conectar al root layout en Fase 4)
+- [x] `src/db/mappers.ts` — conversión `Orden ↔ row` pura + 10 tests de roundtrip
+- [x] `src/db/repositories/ordenes.ts` — `saveOrden` (transaccional, replace sub-colecciones, preserva imágenes por UUID), `getOrden`, `listOrdenes`, `listOrdenesPendientesSync`, `markOrdenSincronizada`
+- [x] `src/db/repositories/catalogos.ts` — replace + get para 4 catálogos
+- [x] `src/db/repositories/syncQueue.ts` — enqueue (con dedup para grabar_orden), listPending, removeItem, markAttemptFailed
+- [x] Normalización `Orden.numero: string | null` (antes `number | string | null`) — el backend mezcla, la DB guarda text, el dominio unifica
+- [x] `pnpm typecheck` ✓
+- [x] `pnpm lint` ✓ (0 warnings)
+- [x] `pnpm test:ci` ✓ (46 tests: 13 constants + 23 parsers + 10 mappers)
+- [x] `pnpm dlx expo-doctor@latest` ✓ (17/17)
 
 ## Fase 4 — Auth
 
