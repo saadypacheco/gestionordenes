@@ -139,12 +139,21 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `app/orden/[id]/materiales.tsx` — FlatList + `TabEmptyState` con ícono `Package`
 - [x] typecheck / lint / test:ci (80) / bundle 7.21 MB ✓
 
+### Fase 6D — Tab Comentarios (read-only) ✅
+
+- [x] `src/features/orden-detalle/comentarios/ComentariosCard.tsx` — card con ícono + label + nota del despachador
+- [x] `app/orden/[id]/comentarios.tsx` — ScrollView con la card o empty state
+- [x] `datos.tsx` — se remueve la sección duplicada "Comentarios de cabecera" (ahora vive solo en el tab dedicado)
+
+### Fase 6E — Tab Recuperos (read-only) ✅
+
+- [x] `src/features/orden-detalle/equipos/EquipoRow.tsx` — componente **compartido** para Equipos + Recuperos: thumb de imagen (o fallback `ImageOff`) + descripción + chip de nro de serie + chip de abonado contextual
+- [x] `app/orden/[id]/recuperos.tsx` — FlatList + `TabEmptyState` con ícono `PackageSearch`
+
 ### Pendientes Fase 6
 
-- [ ] Tab Equipos (con barcode scanner)
-- [ ] Tab Recuperos
-- [ ] Tab Comentarios
-- [ ] Tab Galería (con cámara + upload diferido)
+- [ ] Tab Equipos (reutiliza `EquipoRow`; agrega barcode scanner — Fase 6F)
+- [ ] Tab Galería (con cámara + upload diferido — Fase 6G)
 
 ## Fase 7 — Extensiones (M6)
 
