@@ -30,7 +30,10 @@ export default function GaleriaTab() {
   const { agregar, quitar, saving, error, llenasPorTope, totalFotos } =
     useFotosMutations();
 
-  const imagenes = useMemo(() => orden?.imagenes ?? [], [orden?.imagenes]);
+  const imagenes = useMemo(
+    () => (orden?.imagenes ?? []).filter((i) => (i.tipo ?? 'foto') !== 'firma'),
+    [orden?.imagenes],
+  );
 
   const thumbSize = useMemo(() => {
     const available = width - PADDING * 2 - GAP * (COLUMNS - 1);

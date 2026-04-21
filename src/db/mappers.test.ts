@@ -48,6 +48,7 @@ const imagenFx: OrdenImagen = {
   mimeType: 'image/jpeg',
   estadoId: 1,
   subida: false,
+  tipo: 'foto',
 };
 
 const ordenFx: Orden = {
@@ -193,5 +194,18 @@ describe('OrdenImagen ↔ row', () => {
     });
     expect(back.imagen).toBe('file:///local.jpg');
     expect(back.subida).toBe(true);
+  });
+
+  it('tipo=firma se preserva en roundtrip', () => {
+    const firma: OrdenImagen = {
+      ...imagenFx,
+      imagen: 'file:///firma.jpg',
+      tipo: 'firma',
+      subida: undefined,
+    };
+    const row = toOrdenImagenRow(1234, firma, FIXED_TS);
+    expect(row.tipo).toBe('firma');
+    const back = fromOrdenImagenRow({ id: 1, ...row });
+    expect(back.tipo).toBe('firma');
   });
 });

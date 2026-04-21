@@ -54,6 +54,11 @@ export type OrdenImagen = {
    * las sube con éxito (Fase 8).
    */
   subida?: boolean;
+  /**
+   * 'foto' = evidencia de instalación · 'firma' = firma del cliente al cerrar.
+   * Undefined se trata como 'foto' (compat hacia atrás).
+   */
+  tipo?: 'foto' | 'firma';
 };
 
 export type Orden = {

@@ -24,16 +24,22 @@ type Estado = {
   error: string | null;
 };
 
+/** Cuenta solo las fotos "de evidencia", no las firmas (tipo='firma'). */
+function fotosDeEvidencia(orden: { imagenes: readonly { tipo?: 'foto' | 'firma' }[] }) {
+  return orden.imagenes.filter((i) => (i.tipo ?? 'foto') !== 'firma');
+}
+
 export function useFotosMutations() {
   const { orden, reload } = useOrdenContext();
   const [estado, setEstado] = useState<Estado>({ saving: false, error: null });
 
-  const llenasPorTope = (orden?.imagenes.length ?? 0) >= MAX_FOTOS_POR_ORDEN;
+  const totalFotos = orden ? fotosDeEvidencia(orden).length : 0;
+  const llenasPorTope = totalFotos >= MAX_FOTOS_POR_ORDEN;
 
   const agregar = useCallback(
     async (sourceUri: string): Promise<{ tope: boolean }> => {
       if (!orden) return { tope: false };
-      if (orden.imagenes.length >= MAX_FOTOS_POR_ORDEN) {
+      if (fotosDeEvidencia(orden).length >= MAX_FOTOS_POR_ORDEN) {
         return { tope: true };
       }
 
@@ -115,6 +121,6 @@ export function useFotosMutations() {
     saving: estado.saving,
     error: estado.error,
     llenasPorTope,
-    totalFotos: orden?.imagenes.length ?? 0,
+    totalFotos,
   };
 }
