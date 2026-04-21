@@ -112,13 +112,25 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 
 ## Fase 6 — Detalle de orden
 
-- [ ] Layout con 7 sub-tabs
-- [ ] Tab Tareas (plantilla de referencia para las demás)
+### Fase 6A — Layout + tab Tareas (plantilla) ✅
+
+- [x] `src/features/orden-detalle/useOrdenDetalle.ts` — hook offline-first (DB-only; remoto llega en Fase 8)
+- [x] `src/features/orden-detalle/OrdenContext.tsx` — provider + `useOrdenContext()` para compartir orden entre sub-tabs
+- [x] `HeaderOrden` (cliente + dirección + badge estado + back + chip "Pendiente"), `DetalleLoading`, `DetalleNotFound`, `TabEmptyState` reusable
+- [x] `tareas/TareaRow.tsx` read-only (descripción + cantidad)
+- [x] `app/orden/[id]/_layout.tsx` envuelve `Tabs` con `OrdenProvider` + header custom + gate loading/notFound
+- [x] `app/_layout.tsx` quita header del Stack para `orden/[id]` (usamos el nuestro)
+- [x] `app/orden/[id]/tareas.tsx` FlatList + empty state
+- [x] `pnpm typecheck` / `pnpm lint` / `pnpm test:ci` (72 tests) / `pnpm dlx expo-doctor` (17/17) ✓
+- [x] `pnpm exec expo export --platform android` ✓ (bundle 7.19 MB OK)
+
+### Pendientes Fase 6
+
+- [ ] Tab Datos (read-only)
 - [ ] Tab Equipos (con barcode scanner)
 - [ ] Tab Recuperos
 - [ ] Tab Materiales
 - [ ] Tab Comentarios
-- [ ] Tab Datos
 - [ ] Tab Galería (con cámara + upload diferido)
 
 ## Fase 7 — Extensiones (M6)
