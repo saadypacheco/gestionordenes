@@ -64,7 +64,7 @@ function AppReady() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="login" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="orden/[id]" options={{ headerShown: true, title: 'Orden' }} />
+      <Stack.Screen name="orden/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

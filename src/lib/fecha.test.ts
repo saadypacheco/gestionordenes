@@ -1,4 +1,4 @@
-import { fechaHoyStr, mismaFecha } from './fecha';
+import { fechaDisplay, fechaHoraDisplay, fechaHoyStr, mismaFecha } from './fecha';
 
 describe('fechaHoyStr', () => {
   it('matchea YYYY-MM-DD exacto', () => {
@@ -28,5 +28,45 @@ describe('mismaFecha', () => {
     expect(mismaFecha(null, '2026-04-20')).toBe(false);
     expect(mismaFecha('2026-04-20', undefined)).toBe(false);
     expect(mismaFecha(null, null)).toBe(false);
+  });
+});
+
+describe('fechaDisplay', () => {
+  it('formatea YYYY-MM-DD a DD/MM/YYYY', () => {
+    expect(fechaDisplay('2026-04-20')).toBe('20/04/2026');
+  });
+
+  it('acepta YYYY-MM-DDTHH:mm:ss y se queda con la fecha', () => {
+    expect(fechaDisplay('2026-04-20T10:30:00')).toBe('20/04/2026');
+  });
+
+  it('devuelve "—" para null/undefined/vacio', () => {
+    expect(fechaDisplay(null)).toBe('—');
+    expect(fechaDisplay(undefined)).toBe('—');
+    expect(fechaDisplay('')).toBe('—');
+  });
+
+  it('devuelve el string original si no matchea', () => {
+    expect(fechaDisplay('no-es-fecha')).toBe('no-es-fecha');
+  });
+});
+
+describe('fechaHoraDisplay', () => {
+  it('formatea timestamp ISO a DD/MM/YYYY HH:mm', () => {
+    expect(fechaHoraDisplay('2026-04-20T10:30:45')).toBe('20/04/2026 10:30');
+  });
+
+  it('acepta separador de espacio', () => {
+    expect(fechaHoraDisplay('2026-04-20 10:30:45')).toBe('20/04/2026 10:30');
+  });
+
+  it('devuelve "—" para null/undefined/vacio', () => {
+    expect(fechaHoraDisplay(null)).toBe('—');
+    expect(fechaHoraDisplay(undefined)).toBe('—');
+    expect(fechaHoraDisplay('')).toBe('—');
+  });
+
+  it('devuelve el string original si no matchea', () => {
+    expect(fechaHoraDisplay('2026-04-20')).toBe('2026-04-20');
   });
 });
