@@ -99,11 +99,16 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] **60 tests verdes** (13 constants + 23 parsers + 10 mappers + 7 hash + 7 fecha)
 - [x] `pnpm typecheck` / `pnpm lint` / `pnpm dlx expo-doctor` ✓
 
-## Fase 5 — Listado de órdenes
+## Fase 5 — Listado de órdenes ✅
 
-- [ ] `(tabs)/index.tsx` con lista + pull-to-refresh
-- [ ] Cache en SQLite + refetch con TanStack Query
-- [ ] Banner offline + badge de pendientes
+- [x] `src/hooks/useNetwork.ts` — wrap reactivo de NetInfo
+- [x] `src/lib/formato.ts` + 10 tests — `labelEstadoOrden`, `formatoDireccion`, `formatoCliente`, `tituloOrden`
+- [x] `src/features/ordenes-list/useOrdenesDelDia.ts` — offline-first: lee de DB local como source of truth, fetch del backend opcional al montar + pull-to-refresh, maneja errores de red silenciosamente (banner refleja), preserva datos locales si falla
+- [x] Componentes: `OrdenCard` (ícono chevron, badge de estado con tone-based colors, badge "Pendiente" si `sincronizado=false`), `OfflineBanner`, `EmptyState` (con copy distinto según online/offline), `ErrorBanner` (con botón "Reintentar")
+- [x] `app/(tabs)/index.tsx` — FlatList con RefreshControl + loading state + empty state + banners. Tap en card → `/orden/[id]`
+- [x] Icons: `CloudOff`, `ChevronRight`, `AlertTriangle`, `RefreshCw`, `ClipboardList` de lucide-react-native
+- [x] `pnpm typecheck` / `pnpm lint` / `pnpm test:ci` (72 tests) / `pnpm dlx expo-doctor` (17/17) ✓
+- [x] `pnpm exec expo export --platform android` ✓ (bundle 7.18 MB OK)
 
 ## Fase 6 — Detalle de orden
 
