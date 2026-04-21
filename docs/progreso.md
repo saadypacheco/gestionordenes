@@ -162,20 +162,17 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `galeria/FotoModal.tsx` — modal fullscreen con botón cerrar
 - [x] `app/orden/[id]/galeria.tsx` — grid 3 columnas + modal al tap
 
-### Fase 6F.2 — Equipos (write) 🔜
+### Fase 6F.2 — Equipos (write) ✅
 
-> Agregar / quitar equipos al `orden.equipos`. Todas las deps ya están instaladas (`expo-camera`, `expo-barcode-scanner` vía camera API).
-
-Scope:
-
-- [ ] `src/features/orden-detalle/equipos/useScanner.ts` — hook que pide permiso (`Camera.requestCameraPermissionsAsync`), abre modal con `CameraView` en modo `barcodeScanner`, debounce y validación del código
-- [ ] `src/features/orden-detalle/equipos/ScannerModal.tsx` — fullscreen modal con marco visual + overlay "Apuntá al código", botón cerrar
-- [ ] `src/features/orden-detalle/equipos/EquipoForm.tsx` — form manual (react-hook-form + zod): nroSerie (required), descripción, abonado (switch). Precarga si viene desde scanner
-- [ ] `src/features/orden-detalle/equipos/useAgregarEquipo.ts` — write: actualiza el `Orden.equipos` en memoria, llama `saveOrden` (marca `sincronizado=false`), enqueue en `sync_queue` (tipo `grabar_orden`, modo `ModoGrabado.Equipos = 6`), refresca context con `reload`
-- [ ] Extender `equipos.tsx`: FAB inferior "+" → abre modal con dos tabs (Escanear / Manual). Swipe-to-delete en `EquipoRow` (o botón ✕) → confirm + write
-- [ ] Integración catálogo: si el `nroSerie` matchea un `catEquipos`, precarga descripción + abonado automáticamente
-- [ ] Tests: helpers de validación (zod schema), mapper de nuevo equipo → row
-- [ ] Config Android: verificar `android.permission.CAMERA` en `expo-camera` plugin (ya viene por default)
+- [x] `equipos/validators.ts` — zod schema `equipoFormSchema` + helper `normalizarNroSerie` (+9 tests)
+- [x] `equipos/useEquiposMutations.ts` — `agregar()` (con lookup a `cat_equipos` + dedup por nroSerie) y `quitar(index)`, ambos persisten con `saveOrden(sincronizado=false)` + `enqueueGrabarOrden(ModoGrabado.Equipos)` + `reload()`
+- [x] `equipos/EquipoForm.tsx` — react-hook-form + zod resolver, campos nroSerie (auto-uppercase), descripción, switch abonado; soporta `nroSerieInicial` para precarga desde scanner
+- [x] `equipos/ScannerModal.tsx` — fullscreen `CameraView` con `onBarcodeScanned`, marco visual central, manejo de permisos (`useCameraPermissions`), soporte para 9 tipos de código (QR, code128/39/93, EAN13/8, UPC A/E, datamatrix), lock anti-doble-disparo con botón "escanear de nuevo"
+- [x] `equipos/AgregarEquipoModal.tsx` — bottom sheet con 3 pasos (elegir / scanner / form), keyboard-aware, detecta duplicados y muestra Alert
+- [x] `components/FAB.tsx` — floating action button reusable
+- [x] `EquipoRow.tsx` — prop opcional `onDelete` que muestra botón de trash en danger
+- [x] `equipos.tsx` — FAB "+" abre modal, long/tap a trash pide confirmación y quita
+- [x] 96 tests verdes / typecheck / lint (sin warnings) / bundle 7.28 MB ✓
 
 ### Fase 6G.2 — Galería (write) 🔜
 
