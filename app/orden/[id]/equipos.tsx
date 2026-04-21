@@ -1,12 +1,30 @@
-import { View, Text } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { FlatList } from 'react-native';
+import { Boxes } from 'lucide-react-native';
 
-export default function Equipos() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  // TODO Fase 6 — integrar src/features/orden-detalle/equipos + barcode scanner
+import { useOrdenContext } from '@/features/orden-detalle/OrdenContext';
+import { EquipoRow } from '@/features/orden-detalle/equipos/EquipoRow';
+import { TabEmptyState } from '@/features/orden-detalle/components/TabEmptyState';
+
+export default function EquiposTab() {
+  const { orden } = useOrdenContext();
+  const equipos = orden?.equipos ?? [];
+
+  if (equipos.length === 0) {
+    return (
+      <TabEmptyState
+        icono={Boxes}
+        titulo="Sin equipos"
+        descripcion="Todavía no se registraron equipos instalados."
+      />
+    );
+  }
+
   return (
-    <View className="flex-1 bg-surface-bg p-4">
-      <Text className="text-text-primary">Equipos de la orden {id} (placeholder)</Text>
-    </View>
+    <FlatList
+      data={equipos}
+      keyExtractor={(e, i) => `${e.imagenId ?? e.equipoId ?? 'i'}-${i}`}
+      contentContainerStyle={{ padding: 12, gap: 8 }}
+      renderItem={({ item }) => <EquipoRow equipo={item} contexto="instalado" />}
+    />
   );
 }
