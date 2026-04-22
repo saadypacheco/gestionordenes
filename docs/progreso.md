@@ -187,15 +187,19 @@ Estado de la migración. Se actualiza al cerrar cada fase.
   - `galeria.tsx` — FAB con `Camera` icon, header con contador `N/5 fotos`, Alert de tope y error handling
 - [x] 106 tests verdes / typecheck / lint clean / bundle 7.34 MB ✓
 
-### Fase 7 — Extensiones M6 🔜
+### Fase 7 — Extensiones M6 ✅
 
-> Requieren que Fase 6F.2 y 6G.2 estén cerradas porque dependen de write en orden.
-
-- [ ] `src/features/orden-detalle/useIniciarOrden.ts` — setea `iniciadaAt` (`new Date().toISOString()`) + `saveOrden` + enqueue
-- [ ] `src/features/orden-detalle/useCerrarOrden.ts` — setea `cerradaAt`, captura GPS (`expo-location`, `Accuracy.Balanced`, timeout `GPS_TIMEOUT_MS` = 8s), guarda en `orden.ubicacion` como `"lat,lng"`, `saveOrden`, enqueue
-- [ ] `src/features/orden-detalle/firma/FirmaCanvas.tsx` — canvas con `react-native-signature-canvas` (agregar dep — confirmar con el usuario) o alternativa con `react-native-gesture-handler` + SVG. Exporta base64 → se inserta como `OrdenImagen` con flag diferenciador
-- [ ] Botones en header: "Iniciar" / "Cerrar" según `estadoId`
-- [ ] Tab Datos: mostrar timestamps cuando existan (ya hay sección "Extensiones M6" preparada)
+- [x] **Dep**: `react-native-signature-canvas@5.0.2` + `react-native-webview@13.15.0` (peer) instaladas via `pnpm expo install`
+- [x] **Domain**: `OrdenImagen.tipo?: 'foto' | 'firma'` (+ test de roundtrip que preserva el tipo)
+- [x] **GPS** (`src/lib/gps.ts`): `obtenerUbicacion()` con permisos + timeout `GPS_TIMEOUT_MS` (8s) vía `Promise.race`, devuelve `"lat,lng"` con 6 decimales o resultado con reason. Helpers puros `formatearUbicacion` y `parsearUbicacion` (null-safe, valida rangos lat [-90,90], lng [-180,180]) + 14 tests
+- [x] **Hooks** (`acciones/useOrdenAcciones.ts`):
+  - `iniciar()`: setea `iniciadaAt = now`, fuerza `estadoId=EnCurso` si no estaba cerrada, encola `grabar_orden(ModoGrabado.Estado)`
+  - `cerrar({ firmaSourceUri })`: captura GPS (silencioso si falla, mensaje diferido), procesa firma como `OrdenImagen(tipo='firma')` vía `procesarYGuardarFoto`, setea `cerradaAt=now` + `estadoId=Cerrada`, encola `grabar_orden(Todo)` + `subir_imagen(firma)`
+- [x] **FirmaModal** (`firma/FirmaModal.tsx`): `react-native-signature-canvas` fullscreen con `readSignature()` → `onOK(dataUri)` → callback al padre. Botones Borrar / Confirmar con loading state, webStyle oculta footer nativo, usa paleta del proyecto
+- [x] **AccionesBar** (`acciones/AccionesBar.tsx`): barra al pie del `HeaderOrden` con reglas según estado (Anulada → lock; Cerrada → badge; En curso sin `iniciadaAt` → botón Iniciar; En curso con `iniciadaAt` → botón Cerrar que abre FirmaModal). Prompt si intenta cerrar sin iniciar. Alert diferido si GPS falló
+- [x] **Galería filtrada**: `galeria.tsx` y `useFotosMutations` excluyen `tipo='firma'` del tope de `MAX_FOTOS_POR_ORDEN` y de la grid (las firmas no son "fotos de evidencia")
+- [x] **Tab Datos enriquecido**: sección "Extensiones (M6)" ahora muestra Iniciada / Cerrada / Ubicación (tap → abre Google Maps con `Linking`) / Firma cliente (badge Firmada / No firmada)
+- [x] 116 tests verdes / typecheck / lint clean / expo-doctor 17/17 / bundle 7.44 MB ✓
 
 ### Fase 8 — Sincronización 🔜
 

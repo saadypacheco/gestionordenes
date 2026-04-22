@@ -193,7 +193,7 @@ export function toOrdenImagenRow(
     imagenBase64: isLocal ? null : i.imagen,
     mimeType: i.mimeType,
     estadoId: i.estadoId,
-    tipo: 'foto',
+    tipo: i.tipo ?? 'foto',
     subida,
     createdAt,
   };
@@ -208,5 +208,6 @@ export function fromOrdenImagenRow(r: OrdenImagenRow): OrdenImagen {
     mimeType: r.mimeType,
     estadoId: r.estadoId,
     subida: r.subida,
+    tipo: r.tipo,
   };
 }
