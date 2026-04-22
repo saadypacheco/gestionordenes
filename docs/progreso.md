@@ -219,35 +219,133 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] **Background task** (`sync/background.ts`): `defineSyncTask` en top-level del root layout + `registerBackgroundSync` cuando hay usuario (interval `SYNC_BACKGROUND_INTERVAL_MIN`, `stopOnTerminate=false`, `startOnBoot=true`)
 - [x] 136 tests verdes / typecheck / lint clean / expo-doctor 17/17 / bundle 7.48 MB ✓
 
-## Fase 9 — Build + distribución
+## Fase 9 — Build + distribución 🔜
 
-- [ ] EAS Build preview (APK) — ✅ pipeline ya anda, pendiente verificar APK actual en celular
-- [ ] Test en dispositivo real (pendiente: conseguir un instalador)
+- [ ] EAS Build preview (APK) — ✅ pipeline anda; pendiente validación end-to-end en celular con backend vivo
+- [ ] Test en dispositivo real (pendiente: usuario + credenciales del backend)
 - [ ] Iteración de feedback
 - [ ] Build de producción
+- [ ] Apple Developer account (iOS) — decisión pendiente en AGENTS.md §12
 
-## Fase 10 — Hardening
+## Fase 10 — Hardening 🔜
 
-- [ ] Logs locales rotables (archivo diario en `documentDirectory/logs/`)
-- [ ] Sentry (si se confirma en §12 de AGENTS.md)
+- [ ] Logs locales rotables (archivo diario en `documentDirectory/logs/`, rota cada 7 días)
+- [ ] Sentry (si se confirma en AGENTS.md §12)
 - [ ] OTA updates con `expo-updates` (si se confirma)
-- [ ] Documentación de deploy
+- [ ] Documentación de deploy (`docs/deploy.md`)
+- [ ] Migrar GitHub Actions a Node 24 (warnings de deprecation de Node 20 en CI)
+
+---
+
+## Fase 11 — Capa AI (diferenciadores comerciales) 🔜
+
+> Features que ningún competidor legacy tiene. Costo variable bajo (~$0.008/orden) con margen > 80% si se vende a $10/instalador/mes. Detalle completo en `docs/ideas-producto.md` cuando se cree.
+
+### 11A — Voz → reporte estructurado
+
+- [ ] Capturar audio on-device con `expo-av` (ya instalable, no hay overhead)
+- [ ] Transcripción: evaluar **Groq Whisper** (~$0.0001/orden, 10× más rápido que OpenAI) vs **Deepgram Nova** (calidad superior, $0.002/orden)
+- [ ] LLM: **Claude Haiku 4.5** para armar el texto estructurado a partir del transcript + contexto de la orden (~$0.002/orden). Usa prompt caching para el system prompt y el catálogo de tareas
+- [ ] Reemplaza / complementa el campo `comentarios` de la orden
+- [ ] UI: botón de micrófono en tab Comentarios + spinner + preview del texto antes de guardar
+
+### 11B — OCR del nroSerie de equipos
+
+- [ ] Dep: `@react-native-ml-kit/text-recognition` (on-device, offline, $0 por orden)
+- [ ] Integrar con `ScannerModal` de equipos como alternativa al barcode (algunos equipos viejos no tienen barcode pero sí nro serie impreso)
+- [ ] Fallback a **Claude Vision (Haiku)** cuando el OCR on-device falla (~$0.001/imagen) — ~5% de casos
+- [ ] Autocompletar form desde el catálogo `cat_equipos` al matchear el nroSerie detectado
+
+### 11C — Validación de fotos con AI
+
+- [ ] Pipeline: al subir foto en Galería, disparar llamada async a **Claude Haiku 4.5 vision** con prompt del checklist del tipo de trabajo (~$0.0014/foto)
+- [ ] Respuesta: `{ ok: boolean, problemas: string[], puedeCerrar: boolean }`
+- [ ] UI: badge en `FotoThumb` (✓ verde / ⚠️ amarillo / ✗ rojo) + tooltip con el motivo cuando no pasa
+- [ ] Gate opcional: admin configurable por tipo de trabajo para bloquear el cierre de orden si hay fotos flaggeadas
+- [ ] Batching: una sola call de Claude con las N fotos de la orden + el checklist → ahorra ~60% vs N calls
+- [ ] Prompt caching del checklist (repetido cada orden) → ahorra 30% adicional
+
+### Estimación de costos (resumen)
+
+| Volumen | AI/mes | Hosting | Total |
+|---|---|---|---|
+| 100 órdenes/día | $24 | $20 | **~$45** |
+| 1.000 órdenes/día | $240 | $50 | **~$290** |
+| 10.000 órdenes/día | $2.400 | $200 | **~$2.600** |
+
+---
+
+## Fase 12 — Plataforma SaaS (pivot comercial) 🔜
+
+> Requiere decisión estratégica: hoy el backend es monotenant de Alerthor. Para vender a otras empresas hay que pivotear a una capa propia (o convivir con Alerthor como integración para ese cliente).
+
+### 12A — Backend propio + multi-tenant
+
+- [ ] Elegir stack: **Hono + Neon/Supabase** (serverless, cheap) vs **NestJS + Postgres** (más clásico)
+- [ ] Schema multi-tenant por `empresaId` (row-level security en Supabase, o middleware en Hono)
+- [ ] Migración del modelo desde lo que tenemos en `src/domain/` (ya está definido, solo hay que exponerlo)
+- [ ] Config por cliente: la app lee `extra.apiUrl` del `app.config.ts` — se pueden tener builds diferentes por cliente (white-label) o una sola build con picker inicial
+
+### 12B — Portal web del despachador
+
+- [ ] Nuevo repo: **Next.js + tRPC/Hono + la misma API del backend propio**
+- [ ] Mapa en tiempo real (Mapbox o Google Maps) con instaladores activos
+- [ ] Dashboard de órdenes por estado (Kanban o tabla)
+- [ ] Re-asignación drag-and-drop
+- [ ] Notificaciones push al mobile cuando cambia algo (Expo Push)
+- [ ] WebSocket o polling para sync en tiempo real
+
+### 12C — Link público al cliente final
+
+- [ ] Endpoint `GET /public/orden/:token` — token firmado (JWT corto o UUID con ACL)
+- [ ] Página pública (Next.js): "Tu técnico llega en X min", foto + nombre, mapa en vivo
+- [ ] Al cerrar orden: pantalla "Firmá acá" (reuse del mismo canvas) + encuesta NPS
+- [ ] Email/SMS con el link — Twilio / SendGrid / Brevo
+
+### 12D — White-label + configurador
+
+- [ ] Branding por empresa (logo, colores, splash) — via `app.config.ts` dinámico (EAS Build profile por cliente)
+- [ ] Admin web para configurar: catálogos (tareas/materiales/equipos), estados de orden, checklists de fotos por tipo de trabajo
+- [ ] Self-service de signup para nuevos clientes (pricing page → onboarding)
+
+### 12E — Integraciones
+
+- [ ] Webhooks salientes al cerrar orden (para CRM/ERP del cliente)
+- [ ] Zapier/Make conector
+- [ ] Conectores directos a: HubSpot, Odoo, Alegra/Colppy (facturación)
+
+---
+
+## Fase 13 — Feature polish operativo 🔜
+
+> Mejoras de experiencia que los instaladores piden (post-feedback real). No son diferenciadores pero suman retención.
+
+- [ ] Checklists obligatorios por tipo de trabajo (gate configurable) antes de cerrar
+- [ ] Stock en camioneta por técnico (inventario inicial + descuento por material consumido + alertas de bajo stock)
+- [ ] Chat interno con despacho + "pedir ayuda a supervisor" (foto + audio)
+- [ ] Route optimizer al abrir la jornada (proximidad + ventanas horarias)
+- [ ] KPIs por técnico (first-time-fix rate, tiempo promedio, órdenes/día)
+- [ ] Dark mode (tokens listos en `tailwind.config.js`, falta el toggle)
+- [ ] Audio notes en cualquier tab (complemento de la feature 11A de voz→reporte)
+- [ ] i18n (hoy es-AR hardcoded; abrir al menos a es-genérico + pt-BR)
+- [ ] Tour de onboarding inicial (primer login → 3 pantallas)
 
 ---
 
 ## Roadmap resumen
 
-| Fase | Estado | Depende de |
-|------|--------|-----------|
-| 6A–6E | ✅ mergeado (PR #11, PR #13/14 abiertos) | — |
-| 6F–6G read-only | ✅ (PR #15 abierto) | — |
-| 6F.2 Equipos write | 🔜 | EquipoRow (hecho), scanner nuevo |
-| 6G.2 Galería write | 🔜 | FotoThumb/FotoModal (hechos), procesador de foto nuevo |
-| 7 Extensiones M6 | 🔜 | 6F.2 + 6G.2 (ambas usan el mismo patrón de write+enqueue) |
-| 8 Sync worker | 🔜 | Fase 7 cerrada (sync_queue con items reales) |
-| 9 Build prod | 🔜 | Feedback de APK actual (preview) |
-| 10 Hardening | 🔜 | Fase 9 estabilizada |
+| Fase | Estado |
+|------|--------|
+| 0–5 | ✅ mergeado |
+| 6 read-only (A–G) | ✅ mergeado |
+| 6F.2 + 6G.2 + 7 + 8 | ✅ mergeado (PR #21 a main) |
+| 9 Build prod | 🔜 espera feedback real + Apple Dev |
+| 10 Hardening | 🔜 post-validación de usuarios |
+| 11 AI layer | 🔜 diferenciador comercial — empezar por 11A (voz→reporte) como demo |
+| 12 SaaS platform | 🔜 requiere decisión de pivot (backend propio) |
+| 13 Polish operativo | 🔜 post-feedback |
 
 ## Bloqueos actuales
 
-- ⏳ EAS build `7e704f5e` del release 6A+6B sigue **in queue** desde 11:59 — normalmente tarda pocos minutos, la cola parece lenta. Sin APK todavía no hay validación manual en dispositivo.
+- ⏳ Pendiente validación end-to-end en celular con backend vivo + credenciales.
+- 📋 Decisiones pendientes (AGENTS.md §12): firma de dependencia confirmada ✅, resto siguen abiertas (OTA, Sentry, dark mode, iOS deploy, staging URL, channel de distribución).
