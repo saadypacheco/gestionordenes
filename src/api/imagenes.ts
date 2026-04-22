@@ -1,5 +1,5 @@
 import type { OrdenImagen } from '@/domain/orden';
-import { apiGet, apiPostMultipart } from './client';
+import { apiGet, apiPost, apiPostMultipart } from './client';
 import { parseImagenesList } from './parsers';
 
 /**
@@ -38,4 +38,17 @@ export async function subirImagen(
   form.append('imagenId', imagenId);
 
   await apiPostMultipart<unknown>('/ordenes/guardarImagen', form);
+}
+
+/**
+ * POST /ordenes/borrarImagen — borra una imagen del backend.
+ *
+ * ⚠️ El contrato exacto (path y shape del body) sigue el patrón del legacy
+ * (guardarImagen / imagenesListar). Si el endpoint real usa otro nombre o
+ * method, ajustar acá. Ver AGENTS.md §12.
+ *
+ * No reintenta automáticamente — el syncWorker es responsable del retry.
+ */
+export async function borrarImagen(ordenId: number, imagenId: string): Promise<void> {
+  await apiPost<unknown>('/ordenes/borrarImagen', { ordenId, imagenId });
 }

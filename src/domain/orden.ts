@@ -39,10 +39,26 @@ export type OrdenImagen = {
   ordenId: number;
   /** UUID generado por el cliente (`expo-crypto.randomUUID()`). */
   imagenId: string;
-  /** Base64 cuando viene del backend (`/imagenesListar`). */
+  /**
+   * Fuente de la imagen: base64 cuando viene del backend (`/imagenesListar`)
+   * o URI local `file://...` cuando se tomó desde la cámara del dispositivo.
+   * Ver `src/lib/imagen.ts#imagenToUri` para normalizar a un `<Image>`-compatible.
+   */
   imagen: string | null;
   mimeType: string | null;
   estadoId: number | null;
+  /**
+   * True si la imagen ya está en el backend. Undefined se trata como true
+   * (compat hacia atrás con payloads que vienen del backend).
+   * Local-only photos arrancan en `false` y cambian a `true` cuando el syncWorker
+   * las sube con éxito (Fase 8).
+   */
+  subida?: boolean;
+  /**
+   * 'foto' = evidencia de instalación · 'firma' = firma del cliente al cerrar.
+   * Undefined se trata como 'foto' (compat hacia atrás).
+   */
+  tipo?: 'foto' | 'firma';
 };
 
 export type Orden = {

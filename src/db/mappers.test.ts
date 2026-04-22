@@ -47,6 +47,8 @@ const imagenFx: OrdenImagen = {
   imagen: null,
   mimeType: 'image/jpeg',
   estadoId: 1,
+  subida: false,
+  tipo: 'foto',
 };
 
 const ordenFx: Orden = {
@@ -145,9 +147,65 @@ describe('OrdenImagen ↔ row', () => {
   });
 
   it('imagen base64 no-null ⇒ subida=true (vino del backend)', () => {
-    const withB64: OrdenImagen = { ...imagenFx, imagen: '/9j/4AAQ...' };
+    const withB64: OrdenImagen = { ...imagenFx, imagen: '/9j/4AAQ...', subida: undefined };
     const rowPartial = toOrdenImagenRow(1234, withB64, FIXED_TS);
     expect(rowPartial.subida).toBe(true);
     expect(rowPartial.imagenBase64).toBe('/9j/4AAQ...');
+    expect(rowPartial.imagenUri).toBeNull();
+  });
+
+  it('imagen file:// ⇒ routea a imagenUri y subida=false (local pendiente)', () => {
+    const withLocal: OrdenImagen = {
+      ...imagenFx,
+      imagen: 'file:///data/user/0/app/ordenes/1234/uuid-1.jpg',
+      subida: undefined,
+    };
+    const rowPartial = toOrdenImagenRow(1234, withLocal, FIXED_TS);
+    expect(rowPartial.imagenUri).toBe(
+      'file:///data/user/0/app/ordenes/1234/uuid-1.jpg',
+    );
+    expect(rowPartial.imagenBase64).toBeNull();
+    expect(rowPartial.subida).toBe(false);
+  });
+
+  it('subida explícita gana al default inferido', () => {
+    const withLocalSubida: OrdenImagen = {
+      ...imagenFx,
+      imagen: 'file:///foo.jpg',
+      subida: true, // ya subida aunque sea local
+    };
+    const rowPartial = toOrdenImagenRow(1234, withLocalSubida, FIXED_TS);
+    expect(rowPartial.subida).toBe(true);
+    expect(rowPartial.imagenUri).toBe('file:///foo.jpg');
+  });
+
+  it('fromOrdenImagenRow prefiere imagenUri sobre imagenBase64', () => {
+    const back = fromOrdenImagenRow({
+      id: 1,
+      ordenId: 1234,
+      imagenId: 'uuid-2',
+      imagenUri: 'file:///local.jpg',
+      imagenBase64: '/9j/4AAQ...',
+      mimeType: 'image/jpeg',
+      estadoId: null,
+      tipo: 'foto',
+      subida: true,
+      createdAt: FIXED_TS,
+    });
+    expect(back.imagen).toBe('file:///local.jpg');
+    expect(back.subida).toBe(true);
+  });
+
+  it('tipo=firma se preserva en roundtrip', () => {
+    const firma: OrdenImagen = {
+      ...imagenFx,
+      imagen: 'file:///firma.jpg',
+      tipo: 'firma',
+      subida: undefined,
+    };
+    const row = toOrdenImagenRow(1234, firma, FIXED_TS);
+    expect(row.tipo).toBe('firma');
+    const back = fromOrdenImagenRow({ id: 1, ...row });
+    expect(back.tipo).toBe('firma');
   });
 });

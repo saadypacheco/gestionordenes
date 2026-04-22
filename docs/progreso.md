@@ -162,56 +162,62 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] `galeria/FotoModal.tsx` — modal fullscreen con botón cerrar
 - [x] `app/orden/[id]/galeria.tsx` — grid 3 columnas + modal al tap
 
-### Fase 6F.2 — Equipos (write) 🔜
+### Fase 6F.2 — Equipos (write) ✅
 
-> Agregar / quitar equipos al `orden.equipos`. Todas las deps ya están instaladas (`expo-camera`, `expo-barcode-scanner` vía camera API).
+- [x] `equipos/validators.ts` — zod schema `equipoFormSchema` + helper `normalizarNroSerie` (+9 tests)
+- [x] `equipos/useEquiposMutations.ts` — `agregar()` (con lookup a `cat_equipos` + dedup por nroSerie) y `quitar(index)`, ambos persisten con `saveOrden(sincronizado=false)` + `enqueueGrabarOrden(ModoGrabado.Equipos)` + `reload()`
+- [x] `equipos/EquipoForm.tsx` — react-hook-form + zod resolver, campos nroSerie (auto-uppercase), descripción, switch abonado; soporta `nroSerieInicial` para precarga desde scanner
+- [x] `equipos/ScannerModal.tsx` — fullscreen `CameraView` con `onBarcodeScanned`, marco visual central, manejo de permisos (`useCameraPermissions`), soporte para 9 tipos de código (QR, code128/39/93, EAN13/8, UPC A/E, datamatrix), lock anti-doble-disparo con botón "escanear de nuevo"
+- [x] `equipos/AgregarEquipoModal.tsx` — bottom sheet con 3 pasos (elegir / scanner / form), keyboard-aware, detecta duplicados y muestra Alert
+- [x] `components/FAB.tsx` — floating action button reusable
+- [x] `EquipoRow.tsx` — prop opcional `onDelete` que muestra botón de trash en danger
+- [x] `equipos.tsx` — FAB "+" abre modal, long/tap a trash pide confirmación y quita
+- [x] 96 tests verdes / typecheck / lint (sin warnings) / bundle 7.28 MB ✓
 
-Scope:
+### Fase 6G.2 — Galería (write) ✅
 
-- [ ] `src/features/orden-detalle/equipos/useScanner.ts` — hook que pide permiso (`Camera.requestCameraPermissionsAsync`), abre modal con `CameraView` en modo `barcodeScanner`, debounce y validación del código
-- [ ] `src/features/orden-detalle/equipos/ScannerModal.tsx` — fullscreen modal con marco visual + overlay "Apuntá al código", botón cerrar
-- [ ] `src/features/orden-detalle/equipos/EquipoForm.tsx` — form manual (react-hook-form + zod): nroSerie (required), descripción, abonado (switch). Precarga si viene desde scanner
-- [ ] `src/features/orden-detalle/equipos/useAgregarEquipo.ts` — write: actualiza el `Orden.equipos` en memoria, llama `saveOrden` (marca `sincronizado=false`), enqueue en `sync_queue` (tipo `grabar_orden`, modo `ModoGrabado.Equipos = 6`), refresca context con `reload`
-- [ ] Extender `equipos.tsx`: FAB inferior "+" → abre modal con dos tabs (Escanear / Manual). Swipe-to-delete en `EquipoRow` (o botón ✕) → confirm + write
-- [ ] Integración catálogo: si el `nroSerie` matchea un `catEquipos`, precarga descripción + abonado automáticamente
-- [ ] Tests: helpers de validación (zod schema), mapper de nuevo equipo → row
-- [ ] Config Android: verificar `android.permission.CAMERA` en `expo-camera` plugin (ya viene por default)
+- [x] **Domain**: `OrdenImagen.subida?: boolean` (undefined = true para compat backend)
+- [x] **Mapper fix** (`src/db/mappers.ts`): `toOrdenImagenRow` routea `file://` a `imagenUri` y base64 a `imagenBase64`; `subida` default depende de isLocal (local→false, base64→true) pero respeta override explícito. `fromOrdenImagenRow` prefiere `imagenUri` sobre `imagenBase64`. +4 tests
+- [x] **Repo** (`ordenes.ts`): `removeImagenLocal(ordenId, imagenId)` — delete físico de una imagen, marca orden `sincronizado=false`
+- [x] **Pipeline** (`galeria/fotos.ts`): `dimensionesResize` puro + 6 tests, `procesarYGuardarFoto`: `manipulateAsync` para leer dimensiones reales → resize a lado-máximo 1600px + JPEG quality 0.7 → move al `Paths.document/ordenes/{ordenId}/{uuid}.jpg`
+- [x] **Mutations** (`galeria/useFotosMutations.ts`): `agregar(sourceUri)` — genera UUID con `expo-crypto.randomUUID()`, procesa foto, `saveOrden` con `sincronizado=false`, `enqueueSubirImagen`, rollback de archivo si falla. Tope `MAX_FOTOS_POR_ORDEN = 5`. `quitar(imagen)` solo si `subida !== true`, borra archivo del fs.
+- [x] **UI**:
+  - `CamaraModal.tsx` — `CameraView` + shutter 20×20px, preview post-shot con Repetir / Usar foto + loading en el confirm
+  - `FotoModal.tsx` extendido con chip "Sincronizada" y botón de trash cuando `subida !== true`
+  - `galeria.tsx` — FAB con `Camera` icon, header con contador `N/5 fotos`, Alert de tope y error handling
+- [x] 106 tests verdes / typecheck / lint clean / bundle 7.34 MB ✓
 
-### Fase 6G.2 — Galería (write) 🔜
+### Fase 7 — Extensiones M6 ✅
 
-> Tomar foto, comprimir, guardar path local, encolar upload. Tope `MAX_FOTOS_POR_ORDEN = 5`.
+- [x] **Dep**: `react-native-signature-canvas@5.0.2` + `react-native-webview@13.15.0` (peer) instaladas via `pnpm expo install`
+- [x] **Domain**: `OrdenImagen.tipo?: 'foto' | 'firma'` (+ test de roundtrip que preserva el tipo)
+- [x] **GPS** (`src/lib/gps.ts`): `obtenerUbicacion()` con permisos + timeout `GPS_TIMEOUT_MS` (8s) vía `Promise.race`, devuelve `"lat,lng"` con 6 decimales o resultado con reason. Helpers puros `formatearUbicacion` y `parsearUbicacion` (null-safe, valida rangos lat [-90,90], lng [-180,180]) + 14 tests
+- [x] **Hooks** (`acciones/useOrdenAcciones.ts`):
+  - `iniciar()`: setea `iniciadaAt = now`, fuerza `estadoId=EnCurso` si no estaba cerrada, encola `grabar_orden(ModoGrabado.Estado)`
+  - `cerrar({ firmaSourceUri })`: captura GPS (silencioso si falla, mensaje diferido), procesa firma como `OrdenImagen(tipo='firma')` vía `procesarYGuardarFoto`, setea `cerradaAt=now` + `estadoId=Cerrada`, encola `grabar_orden(Todo)` + `subir_imagen(firma)`
+- [x] **FirmaModal** (`firma/FirmaModal.tsx`): `react-native-signature-canvas` fullscreen con `readSignature()` → `onOK(dataUri)` → callback al padre. Botones Borrar / Confirmar con loading state, webStyle oculta footer nativo, usa paleta del proyecto
+- [x] **AccionesBar** (`acciones/AccionesBar.tsx`): barra al pie del `HeaderOrden` con reglas según estado (Anulada → lock; Cerrada → badge; En curso sin `iniciadaAt` → botón Iniciar; En curso con `iniciadaAt` → botón Cerrar que abre FirmaModal). Prompt si intenta cerrar sin iniciar. Alert diferido si GPS falló
+- [x] **Galería filtrada**: `galeria.tsx` y `useFotosMutations` excluyen `tipo='firma'` del tope de `MAX_FOTOS_POR_ORDEN` y de la grid (las firmas no son "fotos de evidencia")
+- [x] **Tab Datos enriquecido**: sección "Extensiones (M6)" ahora muestra Iniciada / Cerrada / Ubicación (tap → abre Google Maps con `Linking`) / Firma cliente (badge Firmada / No firmada)
+- [x] 116 tests verdes / typecheck / lint clean / expo-doctor 17/17 / bundle 7.44 MB ✓
 
-Scope:
+### Fase 8 — Sincronización ✅
 
-- [ ] `src/features/orden-detalle/galeria/useCamara.ts` — pide permiso, abre `CameraView` fullscreen, botón disparo
-- [ ] `src/features/orden-detalle/galeria/CamaraModal.tsx` — fullscreen con guía + preview tras el disparo + confirmar/repetir
-- [ ] `src/lib/fotos.ts` — `procesarFoto(uri)`: pipeline con `expo-image-manipulator` (resize al lado más largo = `FOTO_MAX_LADO_PX` = 1600, `jpeg` quality `FOTO_JPEG_QUALITY` = 0.7), devuelve path persistente via `expo-file-system` en `FileSystem.documentDirectory + ordenes/{ordenId}/{uuid}.jpg`
-- [ ] `src/features/orden-detalle/galeria/useAgregarFoto.ts` — write: genera `imagenId` con `expo-crypto.randomUUID()`, procesa foto, inserta `OrdenImagen` (imagen = path local, mime `image/jpeg`), `saveOrden`, enqueue `subir_foto` en `sync_queue`, refresca context
-- [ ] Extender `galeria.tsx`: FAB "+" si `imagenes.length < 5`. Al tap en `FotoModal` → botón "Eliminar foto" (soft delete via `estadoId` o remove local — definir en §12 de AGENTS.md)
-- [ ] `imagenToUri` ya soporta `file://` — la galería cachea bien
-- [ ] Tests: `procesarFoto` con mock de image-manipulator, cálculo de ruta, validación del tope de 5
-
-### Fase 7 — Extensiones M6 🔜
-
-> Requieren que Fase 6F.2 y 6G.2 estén cerradas porque dependen de write en orden.
-
-- [ ] `src/features/orden-detalle/useIniciarOrden.ts` — setea `iniciadaAt` (`new Date().toISOString()`) + `saveOrden` + enqueue
-- [ ] `src/features/orden-detalle/useCerrarOrden.ts` — setea `cerradaAt`, captura GPS (`expo-location`, `Accuracy.Balanced`, timeout `GPS_TIMEOUT_MS` = 8s), guarda en `orden.ubicacion` como `"lat,lng"`, `saveOrden`, enqueue
-- [ ] `src/features/orden-detalle/firma/FirmaCanvas.tsx` — canvas con `react-native-signature-canvas` (agregar dep — confirmar con el usuario) o alternativa con `react-native-gesture-handler` + SVG. Exporta base64 → se inserta como `OrdenImagen` con flag diferenciador
-- [ ] Botones en header: "Iniciar" / "Cerrar" según `estadoId`
-- [ ] Tab Datos: mostrar timestamps cuando existan (ya hay sección "Extensiones M6" preparada)
-
-### Fase 8 — Sincronización 🔜
-
-- [ ] `src/features/sync/syncWorker.ts` — itera `sync_queue`, según `tipo`:
-  - `grabar_orden` → POST `/ordenes/grabarSincronizar` con el modo correcto
-  - `subir_foto` → POST `/imagenes/subir` con base64 desde el path local
-- [ ] Retry con backoff exponencial (usa `HTTP_RETRY_INTENTOS` + `HTTP_TIMEOUT_MS` del `client.ts`)
-- [ ] Background task con `expo-background-fetch` + `expo-task-manager`, intervalo `SYNC_BACKGROUND_INTERVAL_MIN = 15`
-- [ ] Tab "Sincronizar" (`app/(tabs)/sync.tsx`): botón manual + status (pendientes, última sync OK, último error) + banner NetInfo
-- [ ] Política: si después de N intentos falla, marca `attemptFailed` con error, se queda en la cola para retry manual
-- [ ] Al marcar una orden sincronizada, refrescar desde backend con `/ordenes/listar` para reconciliar IDs nuevos (equipos/fotos creados en server)
-- [ ] Tests: mock `fetch`, verificar retry/backoff, verificar que imagen local se borra solo al confirmar upload
+- [x] **Schema**: `sync_queue.tipo` extendido con `'borrar_imagen'` (type-only, sin migración SQL)
+- [x] **Repo helpers** (`syncQueue.ts`): `enqueueBorrarImagen`, `removeSubirImagenIfPending` (limpia uploads pendientes si se borra antes de sync), `markImagenSubida` en ordenes
+- [x] **API** (`imagenes.ts`): `borrarImagen(ordenId, imagenId)` → `POST /ordenes/borrarImagen` — contrato asumido del legacy, ajustar si difiere
+- [x] **useFotosMutations.quitar** actualizado: siempre permite eliminar; si `subida=true` encola `borrar_imagen`, siempre limpia uploads pendientes del mismo imagenId
+- [x] **FotoModal**: botón delete siempre disponible, chip "Sincronizada" queda como info
+- [x] **backoff** (`sync/backoff.ts`): exponencial base 30s capado a 10min (30s/1m/2m/4m/8m/10m...) + 10 tests
+- [x] **syncWorker** (`sync/syncWorker.ts`):
+  - `run(ahora?)`: itera cola FIFO, respeta backoff vía `estaListo()`, es reentrante-safe (`_running` lock)
+  - Procesadores por tipo: `grabar_orden` envía cabecera sin imágenes + modo, `subir_imagen` solo archivos `file://`, `borrar_imagen` POST simple
+  - Errores transitorios → `markAttemptFailed` + sigue con otros items
+  - 10 tests con mocks de repos + API (cola vacía, cada tipo, ausente, skip por backoff, falla parcial)
+- [x] **useSyncWorker** hook: pendientes + running + último resultado, auto-run al foreground (AppState) + al pasar offline→online, expone `sincronizar()` manual
+- [x] **Tab Sincronizar** (`app/(tabs)/sync.tsx`): resumen con ícono + contador, stats del último pase (procesadas/con error/postergadas), botón CTA, lista de items pendientes con `SyncQueueRowItem` mostrando intentos, último error y last attempt
+- [x] **Background task** (`sync/background.ts`): `defineSyncTask` en top-level del root layout + `registerBackgroundSync` cuando hay usuario (interval `SYNC_BACKGROUND_INTERVAL_MIN`, `stopOnTerminate=false`, `startOnBoot=true`)
+- [x] 136 tests verdes / typecheck / lint clean / expo-doctor 17/17 / bundle 7.48 MB ✓
 
 ## Fase 9 — Build + distribución
 

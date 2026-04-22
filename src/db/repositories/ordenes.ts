@@ -143,6 +143,38 @@ export async function markOrdenSincronizada(ordenId: number): Promise<void> {
     .where(eq(ordenes.ordenId, ordenId));
 }
 
+/**
+ * Marca una imagen como ya subida al backend. Preserva `imagenUri` (sigue
+ * sirviendo para render local) — solo cambia el flag `subida`.
+ */
+export async function markImagenSubida(imagenId: string): Promise<void> {
+  await db
+    .update(ordenImagenes)
+    .set({ subida: true })
+    .where(eq(ordenImagenes.imagenId, imagenId));
+}
+
 export async function clearAllOrdenes(): Promise<void> {
   await db.delete(ordenes); // cascade limpia sub-tablas
+}
+
+/**
+ * Borra una imagen concreta de una orden. SOLO se usa para deshacer fotos
+ * locales que todavía no se subieron al backend (ver Fase 6G.2). Una vez
+ * sincronizadas, las imágenes son inmutables desde la app.
+ *
+ * Marca la orden como `sincronizado=false` para que el sync worker emita un
+ * refresh cuando el backend soporte borrado de imágenes; por ahora es
+ * local-only y queda huérfana en backend si estaba subida (ver AGENTS.md §12).
+ */
+export async function removeImagenLocal(ordenId: number, imagenId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(ordenImagenes)
+      .where(eq(ordenImagenes.imagenId, imagenId));
+    await tx
+      .update(ordenes)
+      .set({ sincronizado: false, updatedAt: new Date().toISOString() })
+      .where(eq(ordenes.ordenId, ordenId));
+  });
 }

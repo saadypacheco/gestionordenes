@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, CloudOff } from 'lucide-react-native';
 import type { Orden } from '@/domain/orden';
 import { formatoDireccion, labelEstadoOrden, tituloOrden, type EstadoLabel } from '@/lib/formato';
+import { AccionesBar } from '../acciones/AccionesBar';
 
 type Props = {
   orden: Orden;
@@ -62,6 +63,10 @@ export function HeaderOrden({ orden }: Props) {
         <View className={`rounded-md px-2 py-0.5 ${tone.bg}`}>
           <Text className={`text-xs font-medium ${tone.text}`}>{estado.label}</Text>
         </View>
+      </View>
+
+      <View className="mt-3">
+        <AccionesBar />
       </View>
     </View>
   );

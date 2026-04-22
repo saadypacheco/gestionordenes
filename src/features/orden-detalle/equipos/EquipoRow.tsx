@@ -1,15 +1,17 @@
 import { memo } from 'react';
-import { Image, Text, View } from 'react-native';
-import { Hash, ImageOff } from 'lucide-react-native';
+import { Image, Pressable, Text, View } from 'react-native';
+import { Hash, ImageOff, Trash2 } from 'lucide-react-native';
 import type { OrdenEquipo } from '@/domain/orden';
 
 type Props = {
   equipo: OrdenEquipo;
   /** Qué tipo de equipo es — sólo afecta el label del chip "abonado". */
   contexto?: 'instalado' | 'recuperado';
+  /** Si se provee, muestra un botón de eliminar a la derecha. */
+  onDelete?: () => void;
 };
 
-function EquipoRowImpl({ equipo, contexto = 'instalado' }: Props) {
+function EquipoRowImpl({ equipo, contexto = 'instalado', onDelete }: Props) {
   const descripcion =
     equipo.descripcion?.trim() ||
     (equipo.materialId !== null ? `Material #${equipo.materialId}` : 'Equipo sin descripción');
@@ -60,6 +62,18 @@ function EquipoRowImpl({ equipo, contexto = 'instalado' }: Props) {
           )}
         </View>
       </View>
+
+      {onDelete && (
+        <Pressable
+          onPress={onDelete}
+          accessibilityRole="button"
+          accessibilityLabel="Quitar equipo"
+          hitSlop={8}
+          className="ml-2 h-9 w-9 items-center justify-center rounded-full active:bg-state-danger/10"
+        >
+          <Trash2 size={18} color="#DC2626" />
+        </Pressable>
+      )}
     </View>
   );
 }

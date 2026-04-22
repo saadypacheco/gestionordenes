@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { ModoGrabado } from '@/config/constants';
 import { db } from '../client';
 import { syncQueue, type SyncQueueRow } from '../schema';
@@ -45,6 +45,32 @@ export async function enqueueSubirImagen(ordenId: number, imagenId: string): Pro
       imagenId,
       createdAt: new Date().toISOString(),
     });
+}
+
+/**
+ * Encola un borrado de imagen en el backend. Se usa cuando el usuario elimina
+ * una foto ya sincronizada (subida=true).
+ */
+export async function enqueueBorrarImagen(ordenId: number, imagenId: string): Promise<void> {
+  await db.insert(syncQueue).values({
+    tipo: 'borrar_imagen',
+    ordenId,
+    imagenId,
+    createdAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Saca de la cola un subir_imagen pendiente para este `imagenId`. Se llama
+ * cuando el usuario borra una foto local antes de que llegue a subirse —
+ * evita trabajo innecesario y 404 contra una imagen que ya no existe.
+ */
+export async function removeSubirImagenIfPending(imagenId: string): Promise<void> {
+  await db
+    .delete(syncQueue)
+    .where(
+      and(eq(syncQueue.tipo, 'subir_imagen'), eq(syncQueue.imagenId, imagenId)),
+    );
 }
 
 export async function listPending(): Promise<SyncQueueRow[]> {
