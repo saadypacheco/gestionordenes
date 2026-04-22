@@ -171,20 +171,30 @@ export function fromOrdenMaterialRow(r: OrdenMaterialRow): OrdenMaterial {
   };
 }
 
+/** True si el string es un URI local del filesystem. */
+function esLocal(s: string | null | undefined): boolean {
+  return typeof s === 'string' && s.startsWith('file://');
+}
+
 export function toOrdenImagenRow(
   ordenId: number,
   i: OrdenImagen,
   createdAt: string = new Date().toISOString(),
 ): Omit<OrdenImagenRow, 'id'> {
+  const isLocal = esLocal(i.imagen);
+  // Default: backend images (base64) are already uploaded; local files need upload.
+  // Si la domain especifica `subida` explícito, respetarlo (permite marcar subida=true
+  // tras un upload exitoso sin perder el path local).
+  const subida = i.subida ?? (i.imagen !== null && !isLocal);
   return {
     ordenId,
     imagenId: i.imagenId,
-    imagenUri: null,
-    imagenBase64: i.imagen,
+    imagenUri: isLocal ? i.imagen : null,
+    imagenBase64: isLocal ? null : i.imagen,
     mimeType: i.mimeType,
     estadoId: i.estadoId,
     tipo: 'foto',
-    subida: i.imagen !== null, // si ya tiene base64, asumimos que vino del backend y está subida
+    subida,
     createdAt,
   };
 }
@@ -193,8 +203,10 @@ export function fromOrdenImagenRow(r: OrdenImagenRow): OrdenImagen {
   return {
     ordenId: r.ordenId,
     imagenId: r.imagenId,
-    imagen: r.imagenBase64 ?? r.imagenUri,
+    // Preferimos el path local si está disponible: es más barato de renderizar que base64.
+    imagen: r.imagenUri ?? r.imagenBase64,
     mimeType: r.mimeType,
     estadoId: r.estadoId,
+    subida: r.subida,
   };
 }
