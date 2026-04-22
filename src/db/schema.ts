@@ -165,10 +165,13 @@ export const catTiposTrabajo = sqliteTable('cat_tipos_trabajo', {
  *
  * - `tipo='grabar_orden'` → POST /ordenes/grabarSincronizar con payload de ordenId
  * - `tipo='subir_imagen'` → POST /ordenes/guardarImagen con imagenId
+ * - `tipo='borrar_imagen'` → POST /ordenes/borrarImagen con imagenId
  */
 export const syncQueue = sqliteTable('sync_queue', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  tipo: text('tipo', { enum: ['grabar_orden', 'subir_imagen'] }).notNull(),
+  tipo: text('tipo', {
+    enum: ['grabar_orden', 'subir_imagen', 'borrar_imagen'],
+  }).notNull(),
   /** ordenId cuando tipo='grabar_orden'; ordenId de la imagen cuando tipo='subir_imagen'. */
   ordenId: integer('orden_id').notNull(),
   /** imagenId cuando tipo='subir_imagen'. */

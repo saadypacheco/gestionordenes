@@ -143,6 +143,17 @@ export async function markOrdenSincronizada(ordenId: number): Promise<void> {
     .where(eq(ordenes.ordenId, ordenId));
 }
 
+/**
+ * Marca una imagen como ya subida al backend. Preserva `imagenUri` (sigue
+ * sirviendo para render local) — solo cambia el flag `subida`.
+ */
+export async function markImagenSubida(imagenId: string): Promise<void> {
+  await db
+    .update(ordenImagenes)
+    .set({ subida: true })
+    .where(eq(ordenImagenes.imagenId, imagenId));
+}
+
 export async function clearAllOrdenes(): Promise<void> {
   await db.delete(ordenes); // cascade limpia sub-tablas
 }

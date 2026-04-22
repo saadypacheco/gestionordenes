@@ -201,17 +201,23 @@ Estado de la migración. Se actualiza al cerrar cada fase.
 - [x] **Tab Datos enriquecido**: sección "Extensiones (M6)" ahora muestra Iniciada / Cerrada / Ubicación (tap → abre Google Maps con `Linking`) / Firma cliente (badge Firmada / No firmada)
 - [x] 116 tests verdes / typecheck / lint clean / expo-doctor 17/17 / bundle 7.44 MB ✓
 
-### Fase 8 — Sincronización 🔜
+### Fase 8 — Sincronización ✅
 
-- [ ] `src/features/sync/syncWorker.ts` — itera `sync_queue`, según `tipo`:
-  - `grabar_orden` → POST `/ordenes/grabarSincronizar` con el modo correcto
-  - `subir_foto` → POST `/imagenes/subir` con base64 desde el path local
-- [ ] Retry con backoff exponencial (usa `HTTP_RETRY_INTENTOS` + `HTTP_TIMEOUT_MS` del `client.ts`)
-- [ ] Background task con `expo-background-fetch` + `expo-task-manager`, intervalo `SYNC_BACKGROUND_INTERVAL_MIN = 15`
-- [ ] Tab "Sincronizar" (`app/(tabs)/sync.tsx`): botón manual + status (pendientes, última sync OK, último error) + banner NetInfo
-- [ ] Política: si después de N intentos falla, marca `attemptFailed` con error, se queda en la cola para retry manual
-- [ ] Al marcar una orden sincronizada, refrescar desde backend con `/ordenes/listar` para reconciliar IDs nuevos (equipos/fotos creados en server)
-- [ ] Tests: mock `fetch`, verificar retry/backoff, verificar que imagen local se borra solo al confirmar upload
+- [x] **Schema**: `sync_queue.tipo` extendido con `'borrar_imagen'` (type-only, sin migración SQL)
+- [x] **Repo helpers** (`syncQueue.ts`): `enqueueBorrarImagen`, `removeSubirImagenIfPending` (limpia uploads pendientes si se borra antes de sync), `markImagenSubida` en ordenes
+- [x] **API** (`imagenes.ts`): `borrarImagen(ordenId, imagenId)` → `POST /ordenes/borrarImagen` — contrato asumido del legacy, ajustar si difiere
+- [x] **useFotosMutations.quitar** actualizado: siempre permite eliminar; si `subida=true` encola `borrar_imagen`, siempre limpia uploads pendientes del mismo imagenId
+- [x] **FotoModal**: botón delete siempre disponible, chip "Sincronizada" queda como info
+- [x] **backoff** (`sync/backoff.ts`): exponencial base 30s capado a 10min (30s/1m/2m/4m/8m/10m...) + 10 tests
+- [x] **syncWorker** (`sync/syncWorker.ts`):
+  - `run(ahora?)`: itera cola FIFO, respeta backoff vía `estaListo()`, es reentrante-safe (`_running` lock)
+  - Procesadores por tipo: `grabar_orden` envía cabecera sin imágenes + modo, `subir_imagen` solo archivos `file://`, `borrar_imagen` POST simple
+  - Errores transitorios → `markAttemptFailed` + sigue con otros items
+  - 10 tests con mocks de repos + API (cola vacía, cada tipo, ausente, skip por backoff, falla parcial)
+- [x] **useSyncWorker** hook: pendientes + running + último resultado, auto-run al foreground (AppState) + al pasar offline→online, expone `sincronizar()` manual
+- [x] **Tab Sincronizar** (`app/(tabs)/sync.tsx`): resumen con ícono + contador, stats del último pase (procesadas/con error/postergadas), botón CTA, lista de items pendientes con `SyncQueueRowItem` mostrando intentos, último error y last attempt
+- [x] **Background task** (`sync/background.ts`): `defineSyncTask` en top-level del root layout + `registerBackgroundSync` cuando hay usuario (interval `SYNC_BACKGROUND_INTERVAL_MIN`, `stopOnTerminate=false`, `startOnBoot=true`)
+- [x] 136 tests verdes / typecheck / lint clean / expo-doctor 17/17 / bundle 7.48 MB ✓
 
 ## Fase 9 — Build + distribución
 

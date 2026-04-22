@@ -12,7 +12,9 @@ type Props = {
 
 export function FotoModal({ foto, onClose, onDelete }: Props) {
   const uri = foto ? imagenToUri(foto) : null;
-  const puedeEliminar = foto !== null && onDelete !== undefined && foto.subida !== true;
+  // El backend ahora soporta borrado; el botón siempre está disponible cuando
+  // se pasa el callback. El chip "Sincronizada" queda como info.
+  const puedeEliminar = foto !== null && onDelete !== undefined;
   const yaSubida = foto?.subida === true;
 
   return (

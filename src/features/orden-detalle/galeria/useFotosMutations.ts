@@ -3,7 +3,11 @@ import { randomUUID } from 'expo-crypto';
 import type { OrdenImagen } from '@/domain/orden';
 import { MAX_FOTOS_POR_ORDEN } from '@/config/constants';
 import { saveOrden, removeImagenLocal } from '@/db/repositories/ordenes';
-import { enqueueSubirImagen } from '@/db/repositories/syncQueue';
+import {
+  enqueueBorrarImagen,
+  enqueueSubirImagen,
+  removeSubirImagenIfPending,
+} from '@/db/repositories/syncQueue';
 import { useOrdenContext } from '../OrdenContext';
 import { borrarArchivoFoto, procesarYGuardarFoto } from './fotos';
 
@@ -87,23 +91,32 @@ export function useFotosMutations() {
   );
 
   const quitar = useCallback(
-    async (imagen: OrdenImagen): Promise<{ bloqueada: boolean }> => {
-      if (!orden) return { bloqueada: false };
-      // Solo se pueden quitar fotos locales que todavía no se subieron.
-      if (imagen.subida === true) return { bloqueada: true };
+    async (imagen: OrdenImagen): Promise<void> => {
+      if (!orden) return;
       setEstado({ saving: true, error: null });
       try {
+        // Sacamos cualquier subir_imagen pendiente de este imagenId — si todavía
+        // no se subió, no tiene sentido intentarlo.
+        await removeSubirImagenIfPending(imagen.imagenId);
+
+        // Si ya está en backend, hay que avisarle que la borre.
+        if (imagen.subida === true) {
+          await enqueueBorrarImagen(orden.ordenId, imagen.imagenId);
+        }
+
+        // Delete local (optimista). La limitación conocida: si el usuario
+        // refresca la lista desde backend antes de que el syncWorker procese
+        // el borrar_imagen, la foto podría resucitar. Aceptable para MVP —
+        // en la práctica el worker se dispara antes del refresh manual.
         await removeImagenLocal(orden.ordenId, imagen.imagenId);
-        // Borramos el archivo local si es nuestro (file://)
         if (imagen.imagen?.startsWith('file://')) {
           try {
             borrarArchivoFoto(orden.ordenId, imagen.imagenId);
           } catch {
-            /* si falla el fs, no bloquea — queda archivo huérfano */
+            /* archivo huérfano — no bloquea */
           }
         }
         await reload();
-        return { bloqueada: false };
       } catch (e) {
         const msg = e instanceof Error ? e.message : 'No se pudo quitar la foto';
         setEstado({ saving: false, error: msg });
